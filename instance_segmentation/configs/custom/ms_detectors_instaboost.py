@@ -1,0 +1,179 @@
+import os
+_base_  = '../detectors/htc_r50_sac_1x_coco.py'
+
+# model settings
+model = dict(
+    roi_head=dict(
+        bbox_head=[
+            dict(
+                type='Shared2FCBBoxHead',
+                in_channels=256,
+                fc_out_channels=1024,
+                roi_feat_size=7,
+                num_classes=1,
+                bbox_coder=dict(
+                    type='DeltaXYWHBBoxCoder',
+                    target_means=[0., 0., 0., 0.],
+                    target_stds=[0.1, 0.1, 0.2, 0.2]),
+                reg_class_agnostic=True,
+                loss_cls=dict(
+                    type='CrossEntropyLoss',
+                    use_sigmoid=False,
+                    loss_weight=1.0),
+                loss_bbox=dict(type='SmoothL1Loss', beta=1.0,
+                               loss_weight=1.0)),
+            dict(
+                type='Shared2FCBBoxHead',
+                in_channels=256,
+                fc_out_channels=1024,
+                roi_feat_size=7,
+                num_classes=1,
+                bbox_coder=dict(
+                    type='DeltaXYWHBBoxCoder',
+                    target_means=[0., 0., 0., 0.],
+                    target_stds=[0.05, 0.05, 0.1, 0.1]),
+                reg_class_agnostic=True,
+                loss_cls=dict(
+                    type='CrossEntropyLoss',
+                    use_sigmoid=False,
+                    loss_weight=1.0),
+                loss_bbox=dict(type='SmoothL1Loss', beta=1.0,
+                               loss_weight=1.0)),
+            dict(
+                type='Shared2FCBBoxHead',
+                in_channels=256,
+                fc_out_channels=1024,
+                roi_feat_size=7,
+                num_classes=1,
+                bbox_coder=dict(
+                    type='DeltaXYWHBBoxCoder',
+                    target_means=[0., 0., 0., 0.],
+                    target_stds=[0.033, 0.033, 0.067, 0.067]),
+                reg_class_agnostic=True,
+                loss_cls=dict(
+                    type='CrossEntropyLoss',
+                    use_sigmoid=False,
+                    loss_weight=1.0),
+                loss_bbox=dict(type='SmoothL1Loss', beta=1.0, loss_weight=1.0))
+        ],
+        mask_head=[
+            dict(
+                type='HTCMaskHead',
+                with_conv_res=False,
+                num_convs=4,
+                in_channels=256,
+                conv_out_channels=256,
+                num_classes=1,
+                loss_mask=dict(
+                    type='CrossEntropyLoss', use_mask=True, loss_weight=1.0)),
+            dict(
+                type='HTCMaskHead',
+                num_convs=4,
+                in_channels=256,
+                conv_out_channels=256,
+                num_classes=1,
+                loss_mask=dict(
+                    type='CrossEntropyLoss', use_mask=True, loss_weight=1.0)),
+            dict(
+                type='HTCMaskHead',
+                num_convs=4,
+                in_channels=256,
+                conv_out_channels=256,
+                num_classes=1,
+                loss_mask=dict(
+                    type='CrossEntropyLoss', use_mask=True, loss_weight=1.0))
+        ]
+    )
+)
+
+movie_root = "../references/movie_references/"
+movie_transforms = [
+    dict(
+        type="Compose",
+        transforms=[
+            dict(
+                type="GaussNoise", 
+                always_apply=True),
+            dict(
+                type="GaussianBlur",
+                always_apply=True),
+            dict(
+                type="HistogramMatching",
+                reference_images=[movie_root+x for x in os.listdir(movie_root)],
+                always_apply=True)
+        ])
+]
+
+game_root = "../references/game_references/"
+game_transforms = [
+    dict(
+        type="Compose",
+        transforms=[
+            dict(
+                type="CLAHE",
+                always_apply=True),
+            dict(
+                type="FDA",
+                reference_images=[game_root+x for x in os.listdir(game_root)],
+                beta_limit=0.01,
+                always_apply=True)
+        ])
+]
+
+train_transforms = [
+    dict(
+        type='OneOf',
+        transforms= [
+            game_transforms,
+            movie_transforms,
+        ],
+        p=0.5
+    )
+]
+
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        type='LoadAnnotations', with_bbox=True, with_mask=True, with_seg=True),
+    dict(type='Resize', img_scale=(1333, 800), keep_ratio=True),
+    dict(type='RandomFlip', flip_ratio=0.5),
+    dict(
+        type='Albu',
+        transforms=train_transforms,
+        bbox_params=dict(
+            type='BboxParams',
+            format='pascal_voc',
+            label_fields=['gt_labels'],
+            min_visibility=0.0,
+            filter_lost_elements=True),
+        keymap={
+            'img': 'image',
+            'gt_masks': 'masks',
+            'gt_bboxes': 'bboxes'
+        },
+        update_pad_shape=False,
+        skip_img_without_anno=True),
+    dict(type='Normalize', mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True),
+    dict(type='Pad', size_divisor=32),
+    dict(type='SegRescale', scale_factor=1 / 8),
+    dict(type='DefaultFormatBundle'),
+    dict(
+        type='Collect',
+        keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks', 'gt_semantic_seg']),
+]
+
+dataset_type = 'COCODataset'
+classes = ('person')
+data = dict(
+    train=dict(
+        img_prefix='../coco/filtered_images/train/',
+        classes=classes,
+        ann_file='../coco/annotations/train_filtered.json',
+        pipeline=train_pipeline),
+    val=dict(
+        img_prefix='../coco/filtered_images/val/',
+        classes=classes,
+        ann_file='../coco/annotations/val_filtered.json'),
+)
+
+runner = dict(type='EpochBasedRunner', max_epochs=12)
