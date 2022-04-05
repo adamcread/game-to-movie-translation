@@ -1,4 +1,4 @@
-question_1/mmdet/
-question_1/mmdet.egg-info/
 dataset/
+references/
+coco/
 .venv/
