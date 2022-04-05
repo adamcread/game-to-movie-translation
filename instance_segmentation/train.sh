@@ -11,7 +11,7 @@
 #SBATCH -t 07-00:00:00
 
 # job name
-#SBATCH --job-name=train_obj_det
+#SBATCH --job-name=segmentation_train
 
 # Source the bash profile (required to use the module command)
 source /etc/profile
