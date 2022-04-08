@@ -1,5 +1,7 @@
 import os
-_base_  = '../detectors/htc_r50_sac_1x_coco.py'
+import random
+_base_  = '../detectors/detectors_htc_r101_20e_coco.py'
+load_from = './checkpoints/detectors_htc_r101_20e_coco_20210419_203638-348d533b.pth'
 
 # model settings
 model = dict(
@@ -87,6 +89,7 @@ model = dict(
 )
 
 movie_root = "../references/movie_references/"
+movie_references = random.sample([movie_root+x for x in os.listdir(movie_root)], k=500)
 movie_transforms = [
     dict(
         type="Compose",
@@ -99,12 +102,13 @@ movie_transforms = [
                 always_apply=True),
             dict(
                 type="HistogramMatching",
-                reference_images=[movie_root+x for x in os.listdir(movie_root)],
+                reference_images=movie_references,
                 always_apply=True)
         ])
 ]
 
 game_root = "../references/game_references/"
+game_references = random.sample([game_root+x for x in os.listdir(game_root)], k=500)
 game_transforms = [
     dict(
         type="Compose",
@@ -114,7 +118,7 @@ game_transforms = [
                 always_apply=True),
             dict(
                 type="FDA",
-                reference_images=[game_root+x for x in os.listdir(game_root)],
+                reference_images=game_references,
                 beta_limit=0.01,
                 always_apply=True)
         ])
@@ -139,20 +143,18 @@ train_pipeline = [
     dict(type='RandomFlip', flip_ratio=0.5),
     dict(
         type='Albu',
-        transforms=train_transforms,
-        bbox_params=dict(
-            type='BboxParams',
-            format='pascal_voc',
-            label_fields=['gt_labels'],
-            min_visibility=0.0,
-            filter_lost_elements=True),
-        keymap={
-            'img': 'image',
-            'gt_masks': 'masks',
-            'gt_bboxes': 'bboxes'
-        },
-        update_pad_shape=False,
-        skip_img_without_anno=True),
+        transforms=train_transforms),
+    dict(
+        type='InstaBoost',
+        action_candidate=('normal', 'horizontal', 'skip'),
+        action_prob=(1, 0, 0),
+        scale=(0.8, 1.2),
+        dx=15,
+        dy=15,
+        theta=(-1, 1),
+        color_prob=0.25,
+        hflag=False,
+        aug_ratio=0.5),
     dict(type='Normalize', mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True),
     dict(type='Pad', size_divisor=32),
     dict(type='SegRescale', scale_factor=1 / 8),
@@ -163,17 +165,19 @@ train_pipeline = [
 ]
 
 dataset_type = 'COCODataset'
-classes = ('person')
+classes = ('person',)
 data = dict(
     train=dict(
         img_prefix='../coco/filtered_images/train/',
+        seg_prefix='../coco/converted_filtered/train/',
         classes=classes,
-        ann_file='../coco/annotations/train_filtered.json',
-        pipeline=train_pipeline),
+        ann_file='../coco/annotations/train_filtered.json'),
     val=dict(
         img_prefix='../coco/filtered_images/val/',
+        seg_prefix='../coco/converted_filtered/val/',
         classes=classes,
         ann_file='../coco/annotations/val_filtered.json'),
 )
 
 runner = dict(type='EpochBasedRunner', max_epochs=12)
+evaluation = dict(metric=['bbox', 'segm'])

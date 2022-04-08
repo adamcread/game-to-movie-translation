@@ -1,4 +1,6 @@
 dataset/
 references/
 coco/
+coco2/
 .venv/
+instance_segmentation/checkpoints/

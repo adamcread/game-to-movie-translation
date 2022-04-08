@@ -18,4 +18,4 @@ source /etc/profile
 module load cuda/11.0-cudnn8.0
 source ../venv/bin/activate
 
-python3 tools/train.py "./configs/custom/ms_detectors_instaboost.py"
+python3 tools/train.py "./configs/custom/detectors_instaboost.py"
