@@ -88,7 +88,7 @@ model = dict(
     )
 )
 
-movie_root = "../references/movie_references/"
+movie_root = "../dataset/frames/train/movie/"
 movie_references = random.sample([movie_root+x for x in os.listdir(movie_root)], k=500)
 movie_transforms = [
     dict(
@@ -107,7 +107,7 @@ movie_transforms = [
         ])
 ]
 
-game_root = "../references/game_references/"
+game_root = "../dataset/frames/train/game/"
 game_references = random.sample([game_root+x for x in os.listdir(game_root)], k=500)
 game_transforms = [
     dict(
@@ -169,12 +169,12 @@ classes = ('person',)
 data = dict(
     train=dict(
         img_prefix='../coco/images/train/',
-        seg_prefix='../coco/segmentations_2/train/',
+        seg_prefix='../coco/segmentations/train/',
         classes=classes,
         ann_file='../coco/annotations/train_filtered.json'),
     val=dict(
         img_prefix='../coco/filtered_images/val/',
-        seg_prefix='../coco/segmentations_2/val/',
+        seg_prefix='../coco/segmentations/val/',
         classes=classes,
         ann_file='../coco/annotations/val_filtered.json'),
 )
