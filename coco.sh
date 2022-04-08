@@ -26,20 +26,20 @@ cd segmentations
 # wget http://images.cocodataset.org/zips/val2017.zip
 # wget http://images.cocodataset.org/zips/test2017.zip
 # wget http://images.cocodataset.org/zips/unlabeled2017.zip
-wget http://calvin.inf.ed.ac.uk/wp-content/uploads/data/cocostuffdataset/stuffthingmaps_trainval2017.zip
+# wget http://calvin.inf.ed.ac.uk/wp-content/uploads/data/cocostuffdataset/stuffthingmaps_trainval2017.zip
 
 # unzip train2017.zip
 # unzip val2017.zip
 # unzip test2017.zip
 # unzip unlabeled2017.zip
-unzip stuffthingmaps_trainval2017.zip
+# unzip stuffthingmaps_trainval2017.zip
 
 
 # rm train2017.zip
 # rm val2017.zip
 # rm test2017.zip
 # rm unlabeled2017.zip 
-rm stuffthingmaps_trainval2017.zip
+# rm stuffthingmaps_trainval2017.zip
 
 cd ../
 mkdir segmentations_filtered

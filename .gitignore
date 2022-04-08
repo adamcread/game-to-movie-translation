@@ -1,6 +1,7 @@
 dataset/
-references/
-coco/
-coco2/
+coco/annotations/
+coco/images/
+coco/segmentations/
+coco/segmentations_filtered/
 .venv/
 instance_segmentation/checkpoints/
