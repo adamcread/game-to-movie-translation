@@ -168,16 +168,16 @@ dataset_type = 'COCODataset'
 classes = ('person',)
 data = dict(
     train=dict(
-        img_prefix='../coco/filtered_images/train/',
-        seg_prefix='../coco/converted_filtered/train/',
+        img_prefix='../coco/images/train/',
+        seg_prefix='../coco/segmentations_2/train/',
         classes=classes,
         ann_file='../coco/annotations/train_filtered.json'),
     val=dict(
         img_prefix='../coco/filtered_images/val/',
-        seg_prefix='../coco/converted_filtered/val/',
+        seg_prefix='../coco/segmentations_2/val/',
         classes=classes,
         ann_file='../coco/annotations/val_filtered.json'),
 )
 
-runner = dict(type='EpochBasedRunner', max_epochs=12)
+runner = dict(type='EpochBasedRunner', max_epochs=30)
 evaluation = dict(metric=['bbox', 'segm'])
