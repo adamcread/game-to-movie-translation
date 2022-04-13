@@ -167,7 +167,21 @@ train_pipeline = [
 
 test_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='Albu', transforms=train_transforms),
+    dict(type='Albu', 
+        transforms=train_transforms,
+        bbox_params=dict(
+            type='BboxParams',
+            format='pascal_voc',
+            label_fields=['gt_labels'],
+            min_visibility=0.0,
+            filter_lost_elements=True),
+        keymap={
+            'img': 'image',
+            'gt_masks': 'masks',
+            'gt_bboxes': 'bboxes'
+        },
+        update_pad_shape=False,
+        skip_img_without_anno=True),
     dict(
         type='MultiScaleFlipAug',
         img_scale=(1333, 800),
@@ -195,7 +209,8 @@ data = dict(
         img_prefix='../coco/images/val/',
         seg_prefix='../coco/segmentations/val/',
         classes=classes,
-        ann_file='../coco/annotations/val_filtered.json')
+        ann_file='../coco/annotations/val_filtered.json',
+        pipeline=test_pipeline)
 )
 
 runner = dict(type='EpochBasedRunner', max_epochs=5)
