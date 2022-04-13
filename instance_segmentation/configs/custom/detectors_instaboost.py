@@ -198,5 +198,5 @@ data = dict(
         ann_file='../coco/annotations/val_filtered.json')
 )
 
-runner = dict(type='EpochBasedRunner', max_epochs=6)
+runner = dict(type='EpochBasedRunner', max_epochs=5)
 evaluation = dict(metric=['bbox', 'segm'])
