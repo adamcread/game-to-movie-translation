@@ -5,4 +5,4 @@ coco/segmentations/
 coco/segmentations_filtered/
 .venv/
 instance_segmentation/checkpoints/
-image-translation/datasets/
+image_translation/datasets/

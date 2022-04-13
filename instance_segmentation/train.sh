@@ -9,6 +9,7 @@
 #SBATCH --mem=28g
 #SBATCH --qos=long-high-prio
 #SBATCH -t 07-00:00:00
+#SBATCH --nodelist=gpu8
 
 # job name
 #SBATCH --job-name=segmentation_train
