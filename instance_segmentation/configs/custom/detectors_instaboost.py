@@ -181,5 +181,14 @@ data = dict(
         ann_file='../coco/annotations/val_filtered.json')
 )
 
-runner = dict(type='EpochBasedRunner', max_epochs=5)
+runner = dict(type='EpochBasedRunner', max_epochs=6)
 evaluation = dict(metric=['bbox', 'segm'])
+
+lr_config = dict(
+    policy='step',
+    warmup='linear',
+    warmup_iters=2000,
+    warmup_ratio=0.001,
+    step=[8, 11])
+
+optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
