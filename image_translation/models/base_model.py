@@ -44,17 +44,6 @@ class BaseModel(ABC):
         self.metric = 0  # used for learning rate policy 'plateau'
 
     @staticmethod
-    def dict_grad_hook_factory(add_func=lambda x: x):
-        saved_dict = dict()
-
-        def hook_gen(name):
-            def grad_hook(grad):
-                saved_vals = add_func(grad)
-                saved_dict[name] = saved_vals
-            return grad_hook
-        return hook_gen, saved_dict
-
-    @staticmethod
     def modify_commandline_options(parser, is_train):
         """Add new model-specific options, and rewrite default values for existing options.
 
@@ -95,19 +84,9 @@ class BaseModel(ABC):
         if self.isTrain:
             self.schedulers = [networks.get_scheduler(optimizer, opt) for optimizer in self.optimizers]
         if not self.isTrain or opt.continue_train:
-            load_suffix = opt.epoch
+            load_suffix = 'iter_%d' % opt.load_iter if opt.load_iter > 0 else opt.epoch
             self.load_networks(load_suffix)
-
         self.print_networks(opt.verbose)
-
-    def parallelize(self):
-        for name in self.model_names:
-            if isinstance(name, str):
-                net = getattr(self, 'net' + name)
-                setattr(self, 'net' + name, torch.nn.DataParallel(net, self.opt.gpu_ids))
-
-    def data_dependent_initialize(self, data):
-        pass
 
     def eval(self):
         """Make models eval mode during test time"""
@@ -202,12 +181,7 @@ class BaseModel(ABC):
         for name in self.model_names:
             if isinstance(name, str):
                 load_filename = '%s_net_%s.pth' % (epoch, name)
-                if self.opt.isTrain and self.opt.pretrained_name is not None:
-                    load_dir = os.path.join(self.opt.checkpoints_dir, self.opt.pretrained_name)
-                else:
-                    load_dir = self.save_dir
-
-                load_path = os.path.join(load_dir, load_filename)
+                load_path = os.path.join(self.save_dir, load_filename)
                 net = getattr(self, 'net' + name)
                 if isinstance(net, torch.nn.DataParallel):
                     net = net.module
@@ -219,8 +193,8 @@ class BaseModel(ABC):
                     del state_dict._metadata
 
                 # patch InstanceNorm checkpoints prior to 0.4
-                # for key in list(state_dict.keys()):  # need to copy keys here because we mutate in loop
-                #    self.__patch_instance_norm_state_dict(state_dict, net, key.split('.'))
+                for key in list(state_dict.keys()):  # need to copy keys here because we mutate in loop
+                    self.__patch_instance_norm_state_dict(state_dict, net, key.split('.'))
                 net.load_state_dict(state_dict)
 
     def print_networks(self, verbose):
@@ -253,6 +227,3 @@ class BaseModel(ABC):
             if net is not None:
                 for param in net.parameters():
                     param.requires_grad = requires_grad
-
-    def generate_visuals_for_evaluation(self, data, mode):
-        return {}

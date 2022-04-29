@@ -5,6 +5,7 @@ import ntpath
 import time
 from . import util, html
 from subprocess import Popen, PIPE
+from scipy.misc import imresize
 
 if sys.version_info[0] == 2:
     VisdomExceptionBase = Exception
@@ -33,10 +34,15 @@ def save_images(webpage, visuals, image_path, aspect_ratio=1.0, width=256):
 
     for label, im_data in visuals.items():
         im = util.tensor2im(im_data)
-        image_name = '%s/%s.png' % (label, name)
-        os.makedirs(os.path.join(image_dir, label), exist_ok=True)
+        image_name = '%s_%s.png' % (name, label)
         save_path = os.path.join(image_dir, image_name)
-        util.save_image(im, save_path, aspect_ratio=aspect_ratio)
+        h, w, _ = im.shape
+        if aspect_ratio > 1.0:
+            im = imresize(im, (h, int(w * aspect_ratio)), interp='bicubic')
+        if aspect_ratio < 1.0:
+            im = imresize(im, (int(h / aspect_ratio), w), interp='bicubic')
+        util.save_image(im, save_path)
+
         ims.append(image_name)
         txts.append(label)
         links.append(image_name)
@@ -60,10 +66,7 @@ class Visualizer():
         Step 4: create a logging file to store training losses
         """
         self.opt = opt  # cache the option
-        if opt.display_id is None:
-            self.display_id = np.random.randint(100000) * 10  # just a random display id
-        else:
-            self.display_id = opt.display_id
+        self.display_id = opt.display_id
         self.use_html = opt.isTrain and not opt.no_html
         self.win_size = opt.display_winsize
         self.name = opt.name
@@ -71,13 +74,8 @@ class Visualizer():
         self.saved = False
         if self.display_id > 0:  # connect to a visdom server given <display_port> and <display_server>
             import visdom
-            self.plot_data = {}
             self.ncols = opt.display_ncols
-            if "tensorboard_base_url" not in os.environ:
-                self.vis = visdom.Visdom(server=opt.display_server, port=opt.display_port, env=opt.display_env)
-            else:
-                self.vis = visdom.Visdom(port=2004,
-                                         base_url=os.environ['tensorboard_base_url'] + '/visdom')
+            self.vis = visdom.Visdom(server=opt.display_server, port=opt.display_port, env=opt.display_env)
             if not self.vis.check_connection():
                 self.create_visdom_connections()
 
@@ -142,8 +140,8 @@ class Visualizer():
                 if label_html_row != '':
                     label_html += '<tr>%s</tr>' % label_html_row
                 try:
-                    self.vis.images(images, ncols, 2, self.display_id + 1,
-                                    None, dict(title=title + ' images'))
+                    self.vis.images(images, nrow=ncols, win=self.display_id + 1,
+                                    padding=2, opts=dict(title=title + ' images'))
                     label_html = '<table>%s</table>' % label_html
                     self.vis.text(table_css + label_html, win=self.display_id + 2,
                                   opts=dict(title=title + ' labels'))
@@ -155,12 +153,8 @@ class Visualizer():
                 try:
                     for label, image in visuals.items():
                         image_numpy = util.tensor2im(image)
-                        self.vis.image(
-                            image_numpy.transpose([2, 0, 1]),
-                            self.display_id + idx,
-                            None,
-                            dict(title=label)
-                        )
+                        self.vis.image(image_numpy.transpose([2, 0, 1]), opts=dict(title=label),
+                                       win=self.display_id + idx)
                         idx += 1
                 except VisdomExceptionBase:
                     self.create_visdom_connections()
@@ -174,7 +168,7 @@ class Visualizer():
                 util.save_image(image_numpy, img_path)
 
             # update website
-            webpage = html.HTML(self.web_dir, 'Experiment name = %s' % self.name, refresh=0)
+            webpage = html.HTML(self.web_dir, 'Experiment name = %s' % self.name, refresh=1)
             for n in range(epoch, 0, -1):
                 webpage.add_header('epoch [%d]' % n)
                 ims, txts, links = [], [], []
@@ -196,29 +190,20 @@ class Visualizer():
             counter_ratio (float) -- progress (percentage) in the current epoch, between 0 to 1
             losses (OrderedDict)  -- training losses stored in the format of (name, float) pairs
         """
-        if len(losses) == 0:
-            return
-
-        plot_name = '_'.join(list(losses.keys()))
-
-        if plot_name not in self.plot_data:
-            self.plot_data[plot_name] = {'X': [], 'Y': [], 'legend': list(losses.keys())}
-
-        plot_data = self.plot_data[plot_name]
-        plot_id = list(self.plot_data.keys()).index(plot_name)
-
-        plot_data['X'].append(epoch + counter_ratio)
-        plot_data['Y'].append([losses[k] for k in plot_data['legend']])
+        if not hasattr(self, 'plot_data'):
+            self.plot_data = {'X': [], 'Y': [], 'legend': list(losses.keys())}
+        self.plot_data['X'].append(epoch + counter_ratio)
+        self.plot_data['Y'].append([losses[k] for k in self.plot_data['legend']])
         try:
             self.vis.line(
-                X=np.stack([np.array(plot_data['X'])] * len(plot_data['legend']), 1),
-                Y=np.array(plot_data['Y']),
+                X=np.stack([np.array(self.plot_data['X'])] * len(self.plot_data['legend']), 1),
+                Y=np.array(self.plot_data['Y']),
                 opts={
-                    'title': self.name,
-                    'legend': plot_data['legend'],
+                    'title': self.name + ' loss over time',
+                    'legend': self.plot_data['legend'],
                     'xlabel': 'epoch',
                     'ylabel': 'loss'},
-                win=self.display_id - plot_id)
+                win=self.display_id)
         except VisdomExceptionBase:
             self.create_visdom_connections()
 
