@@ -88,83 +88,6 @@ model = dict(
     )
 )
 
-movie_root = "../dataset/frames/train/movie/"
-movie_references = random.sample([movie_root+x for x in os.listdir(movie_root)], k=500)
-game_root = "../dataset/frames/train/game/"
-game_references = random.sample([game_root+x for x in os.listdir(game_root)], k=500)
-train_transforms = [
-    dict(
-        type='OneOf',
-        transforms= [
-            dict(
-                type="Compose",
-                transforms=[
-                    dict(
-                        type="CLAHE", always_apply=True),
-                    dict(
-                        type="FDA",
-                        reference_images=game_references,
-                        beta_limit=0.01,
-                        always_apply=True)
-                ]),
-            dict(
-                type="Compose",
-                transforms=[
-                    dict(
-                        type="GaussNoise", always_apply=True),
-                    dict(
-                        type="GaussianBlur", always_apply=True),
-                    dict(
-                        type="HistogramMatching",
-                        reference_images=movie_references,
-                        always_apply=True)
-                ])
-        ],
-        p=0.5
-    )
-]
-
-train_pipeline = [
-    dict(type='LoadImageFromFile'),
-    dict(
-        type='LoadAnnotations', with_bbox=True, with_mask=True, with_seg=True),
-    dict(type='Resize', img_scale=(1333, 800), keep_ratio=True),
-    dict(type='RandomFlip', flip_ratio=0.5),
-    dict(type='Albu', 
-        transforms=train_transforms,
-        bbox_params=dict(
-            type='BboxParams',
-            format='pascal_voc',
-            label_fields=['gt_labels'],
-            min_visibility=0.0,
-            filter_lost_elements=True),
-        keymap={
-            'img': 'image',
-            'gt_masks': 'masks',
-            'gt_bboxes': 'bboxes'
-        },
-        update_pad_shape=False,
-        skip_img_without_anno=True),
-    dict(
-        type='InstaBoost',
-        action_candidate=('normal', 'horizontal', 'skip'),
-        action_prob=(1, 0, 0),
-        scale=(0.8, 1.2),
-        dx=15,
-        dy=15,
-        theta=(-1, 1),
-        color_prob=0.25,
-        hflag=False,
-        aug_ratio=0.5),
-    dict(type='Normalize', mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True),
-    dict(type='Pad', size_divisor=32),
-    dict(type='SegRescale', scale_factor=1 / 8),
-    dict(type='DefaultFormatBundle'),
-    dict(
-        type='Collect',
-        keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks', 'gt_semantic_seg']),
-]
-
 dataset_type = 'COCODataset'
 classes = ('person',)
 data = dict(
@@ -172,8 +95,7 @@ data = dict(
         img_prefix='../coco/images/train/',
         seg_prefix='../coco/segmentations/train/',
         classes=classes,
-        ann_file='../coco/annotations/train_filtered.json',
-        pipeline=train_pipeline),
+        ann_file='../coco/annotations/train_filtered.json'),
     val=dict(
         img_prefix='../coco/images/val/',
         seg_prefix='../coco/segmentations/val/',

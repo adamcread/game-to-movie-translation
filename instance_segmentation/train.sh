@@ -19,4 +19,9 @@ source /etc/profile
 module load cuda/11.0-cudnn8.0
 source ../venv/bin/activate
 
-python3 tools/train.py "./configs/custom/detectors_instaboost.py"
+if [ $1 = "aug" ]
+then
+    python3 tools/train.py "./configs/custom/detectors_instaboost_aug.py"
+else 
+    python3 tools/train.py "./configs/custom/detectors_instaboost.py"
+fi
