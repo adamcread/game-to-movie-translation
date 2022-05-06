@@ -38,4 +38,5 @@ python3 train.py \
     --niter 80 \
     --niters_decay 0 \
     --display_freq 100 \
-    --print_freq 100
+    --print_freq 100 \
+    --continue_train
