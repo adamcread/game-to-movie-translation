@@ -36,7 +36,7 @@ python3 train.py \
     --crop_size 256 \
     --batch_size 4 \
     --niter 80 \
-    --niters_decay 0 \
+    --niter_decay 0 \
     --display_freq 100 \
     --print_freq 100 \
     --continue_train
