@@ -19,24 +19,51 @@ source /etc/profile
 module load cuda/11.0-cudnn8.0
 source ../venv/bin/activate
 
-python3 train.py \
-    --dataroot ./datasets/game2movie/ \
-    --checkpoints_dir './checkpoints/' \
-    --direction $1 \
-    --name 'game2movie_'$1 \
-    --model attention_gan \
-    --dataset_mode unaligned \
-    --pool_size 50 \
-    --no_dropout \
-    --norm instance \
-    --lambda_A 10 \
-    --lambda_B 10 \
-    --lambda_identity 0.5 \
-    --load_size 286 \
-    --crop_size 256 \
-    --batch_size 4 \
-    --niter 80 \
-    --niter_decay 0 \
-    --display_freq 100 \
-    --print_freq 100 \
-    --continue_train
+if [ $# -eq 1 ]
+then  
+    python3 train.py \
+        --dataroot ./datasets/game2movie/ \
+        --checkpoints_dir './checkpoints/' \
+        --direction $1 \
+        --name 'game2movie_'$1 \
+        --model attention_gan \
+        --dataset_mode unaligned \
+        --pool_size 50 \
+        --no_dropout \
+        --norm instance \
+        --lambda_A 10 \
+        --lambda_B 10 \
+        --lambda_identity 0.5 \
+        --load_size 286 \
+        --crop_size 256 \
+        --batch_size 4 \
+        --niter 10 \
+        --niter_decay 0 \
+        --display_freq 100 \
+        --print_freq 100 \
+else 
+    if [ $2 = 'continue' ]
+    then 
+        python3 train.py \
+            --dataroot ./datasets/game2movie/ \
+            --checkpoints_dir './checkpoints/' \
+            --direction $1 \
+            --name 'game2movie_'$1 \
+            --model attention_gan \
+            --dataset_mode unaligned \
+            --pool_size 50 \
+            --no_dropout \
+            --norm instance \
+            --lambda_A 10 \
+            --lambda_B 10 \
+            --lambda_identity 0.5 \
+            --load_size 286 \
+            --crop_size 256 \
+            --batch_size 4 \
+            --niter 80 \
+            --niter_decay 0 \
+            --display_freq 100 \
+            --print_freq 100 \
+            --continue_train
+    fi
+fi
