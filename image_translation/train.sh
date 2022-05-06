@@ -21,7 +21,7 @@ source ../venv/bin/activate
 
 python3 train.py \
     --dataroot ./datasets/game2movie/ \
-    --checkpoints_dir './checkpoints/game2movie_'$1 \
+    --checkpoints_dir './checkpoints/' \
     --direction $1 \
     --name 'game2movie_'$1 \
     --model attention_gan \
