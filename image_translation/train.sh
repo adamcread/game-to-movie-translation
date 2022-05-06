@@ -40,9 +40,10 @@ if [ $2 = 'continue' ]
         --niter 80 \
         --niter_decay 0 \
         --display_freq 100 \
-        --print_freq 100
+        --print_freq 100 \
         --continue_train
-else
+elif [ $2 = 'no-continue' ]
+then
     python3 train.py \
         --dataroot ./datasets/game2movie/ \
         --checkpoints_dir './checkpoints/' \
