@@ -61,7 +61,7 @@ then
         --load_size 286 \
         --crop_size 256 \
         --batch_size 4 \
-        --niter 80 \
+        --niter 10 \
         --niter_decay 0 \
         --display_freq 100 \
         --print_freq 100
