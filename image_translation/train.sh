@@ -20,12 +20,13 @@ module load cuda/11.0-cudnn8.0
 source ../venv/bin/activate
 
 
-if [ $2 = 'continue' ]
+if [ $2 = "continue" ]
+then
     python3 train.py \
         --dataroot ./datasets/game2movie/ \
-        --checkpoints_dir './checkpoints/' \
+        --checkpoints_dir "./checkpoints/" \
         --direction $1 \
-        --name 'game2movie_'$1 \
+        --name "game2movie_"$1 \
         --model attention_gan \
         --dataset_mode unaligned \
         --pool_size 50 \
@@ -42,13 +43,13 @@ if [ $2 = 'continue' ]
         --display_freq 100 \
         --print_freq 100 \
         --continue_train
-elif [ $2 = 'no-continue' ]
+elif [ $2 = "no-continue" ]
 then
     python3 train.py \
         --dataroot ./datasets/game2movie/ \
-        --checkpoints_dir './checkpoints/' \
+        --checkpoints_dir "./checkpoints/" \
         --direction $1 \
-        --name 'game2movie_'$1 \
+        --name "game2movie_"$1 \
         --model attention_gan \
         --dataset_mode unaligned \
         --pool_size 50 \
