@@ -421,7 +421,7 @@ class ResnetGenerator_our(nn.Module):
         self.deconv1_norm_content = nn.InstanceNorm2d(ngf * 2)
         self.deconv2_content = nn.ConvTranspose2d(ngf * 2, ngf, 3, 2, 1, 1)
         self.deconv2_norm_content = nn.InstanceNorm2d(ngf)
-        self.deconv3_content = nn.Conv2d(ngf, 27, 7, 1, 0)
+        self.deconv3_content = nn.Conv2d(ngf, 30, 7, 1, 0)
 
         self.deconv1_attention = nn.ConvTranspose2d(ngf * 4, ngf * 2, 3, 2, 1, 1)
         self.deconv1_norm_attention = nn.InstanceNorm2d(ngf * 2)
@@ -466,7 +466,7 @@ class ResnetGenerator_our(nn.Module):
         image7 = image[:, 18:21, :, :]
         image8 = image[:, 21:24, :, :]
         image9 = image[:, 24:27, :, :]
-        # image10 = image[:, 27:30, :, :]
+        image10 = image[:, 27:30, :, :]
 
         x_attention = F.relu(self.deconv1_norm_attention(self.deconv1_attention(x)))
         x_attention = F.relu(self.deconv2_norm_attention(self.deconv2_attention(x_attention)))
@@ -509,12 +509,12 @@ class ResnetGenerator_our(nn.Module):
         output7 = image7 * attention7
         output8 = image8 * attention8
         output9 = image9 * attention9
-        # output10 = image10 * attention10
-        output10 = input * attention10
+        output10 = image10 * attention10
+        # output10 = input * attention10
 
         o=output1 + output2 + output3 + output4 + output5 + output6 + output7 + output8 + output9 + output10
 
-        return o, output1, output2, output3, output4, output5, output6, output7, output8, output9, output10, attention1,attention2,attention3, attention4, attention5, attention6, attention7, attention8,attention9,attention10, image1, image2,image3,image4,image5,image6,image7,image8,image9
+        return o, output1, output2, output3, output4, output5, output6, output7, output8, output9, output10, attention1,attention2,attention3, attention4, attention5, attention6, attention7, attention8,attention9,attention10, image1, image2,image3,image4,image5,image6,image7,image8,image9,image10
 
 # resnet block with reflect padding
 class resnet_block(nn.Module):
