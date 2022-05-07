@@ -23,7 +23,7 @@ source ../venv/bin/activate
 if [ $2 = "continue" ]
 then
     python3 train.py \
-        --dataroot ./datasets/game2movie/ \
+        --dataroot "../dataset/frames/train/" \
         --checkpoints_dir "./checkpoints/" \
         --direction $1 \
         --name "game2movie_"$1 \
@@ -47,7 +47,7 @@ then
 elif [ $2 = "no-continue" ]
 then
     python3 train.py \
-        --dataroot ./datasets/game2movie/ \
+        --dataroot "../dataset/frames/train/" \
         --checkpoints_dir "./checkpoints/" \
         --direction $1 \
         --name "game2movie_"$1 \
