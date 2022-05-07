@@ -50,7 +50,7 @@ class UnalignedDataset(BaseDataset):
             B_paths (str)    -- image paths
         """
         A_path = self.A_paths[index % self.A_size]  # make sure index is within then range
-        A_mask_path = A_path.replace('train/trainA', 'mask/maskA')
+        A_mask_path = A_path.replace('train/trainA', 'mask/trainA')
 
         if self.opt.serial_batches:   # make sure index is within then range
             index_B = index % self.B_size
@@ -58,7 +58,7 @@ class UnalignedDataset(BaseDataset):
             index_B = random.randint(0, self.B_size - 1)
 
         B_path = self.B_paths[index_B]
-        B_mask_path = B_path.replace('train/trainB', 'mask/maskB')
+        B_mask_path = B_path.replace('train/trainB', 'mask/trainB')
 
         A_img = Image.open(A_path).convert('RGB')
         B_img = Image.open(B_path).convert('RGB')

@@ -44,29 +44,29 @@ def NMS(boxes, overlapThresh = 0.7):
 
     return boxes[indices]
 
-segmentation_json = json.loads(open('../../instance_segmentation/results.segm.json', 'r').read())
+if __name__ == '__main__':
+    segmentation_json = json.loads(open('../annotation/test.segm.json', 'r').read())
 
+    id = 0
+    bboxes = {}
+    for ann_id, segmentation in enumerate(segmentation_json):
+        id = int(segmentation['image_id'])
+        bboxes[id] = bboxes.get(id, [])
+        score = float(segmentation["score"])
 
-id = 0
-bboxes = {}
-for ann_id, segmentation in enumerate(segmentation_json):
-    id = int(segmentation['image_id'])
-    bboxes[id] = bboxes.get(id, [])
-    score = float(segmentation["score"])
+        if score > 0.90:
+            bboxes[id].append([*segmentation['bbox'], score, segmentation["segmentation"]])
 
-    if score > 0.90:
-        bboxes[id].append([*segmentation['bbox'], score, segmentation["segmentation"]])
+    dataset = COCO(annotation_file="../annotation/test.json")
+    for id in bboxes.keys():
+        image_bboxes = np.array([*bboxes[id]])
+        suppressed_bboxes = np.array(NMS(image_bboxes))
+        mask = np.zeros(suppressed_bboxes[0][5]["size"])
 
-dataset = COCO(annotation_file="../annotation/test_segmentation.json")
-for id in bboxes.keys():
-    image_bboxes = np.array([*bboxes[id]])
-    suppressed_bboxes = np.array(NMS(image_bboxes))
-    mask = np.zeros(suppressed_bboxes[0][5]["size"])
-
-    for annotation in suppressed_bboxes:
-        mask = mask + decode(annotation[5])    
-    
-    file_name = dataset.loadImgs(ids=id)[0]["file_name"]
-    print(file_name)
-    cv.imwrite(f'../frames/mask/{file_name}.png', mask*255)
+        for annotation in suppressed_bboxes:
+            mask = mask + decode(annotation[5])    
+        
+        file_name = dataset.loadImgs(ids=id)[0]["file_name"]
+        print(file_name)
+        cv.imwrite(f'../frames/mask/{file_name}.png', mask*255)
 

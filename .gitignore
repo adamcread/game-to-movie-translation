@@ -1,5 +1,6 @@
 dataset/frames/
 dataset/patches/
+dataset/videos/
 coco/annotations/
 coco/images/
 coco/segmentations/
