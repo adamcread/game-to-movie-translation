@@ -71,9 +71,11 @@ if __name__ == '__main__':
         mask = np.zeros((height, width))
 
         if len(suppressed_bboxes):
+            for i, annotation in enumerate(suppressed_bboxes):
+                patch = decode(annotation[5])
+                cv.imwrite(f'../patches/extracted/{file_name}_{i}.png', patch*255)
 
-            for annotation in suppressed_bboxes:
-                mask = mask + decode(annotation[5])    
+                mask = mask + patch
     
         print(file_name)
         cv.imwrite(f'../frames/mask/{file_name}.png', mask*255)
