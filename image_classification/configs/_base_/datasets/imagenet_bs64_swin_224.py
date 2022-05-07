@@ -49,6 +49,7 @@ test_pipeline = [
     dict(type='ImageToTensor', keys=['img']),
     dict(type='Collect', keys=['img'])
 ]
+
 data = dict(
     samples_per_gpu=64,
     workers_per_gpu=8,
@@ -66,6 +67,7 @@ data = dict(
         type=dataset_type,
         data_prefix='data/imagenet/val',
         ann_file='data/imagenet/meta/val.txt',
-        pipeline=test_pipeline))
+        pipeline=test_pipeline)
+)
 
 evaluation = dict(interval=10, metric='accuracy')
