@@ -7,7 +7,7 @@ import os.path
 # for frame in frames
 # load matching ones in images
 # do multiplication
-for dir in ['trainA', 'trainB']:
+for dir in ['trainB']:
     image_root = f"../frames/train/{dir}/"
     mask_root = f"../frames/mask/{dir}/"
     patch_root= f"../patches/mask/{dir}/"
