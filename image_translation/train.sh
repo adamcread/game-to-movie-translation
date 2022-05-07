@@ -42,6 +42,7 @@ then
         --niter_decay 0 \
         --display_freq 100 \
         --print_freq 100 \
+        --save_epoch_freq 20 \
         --continue_train
 elif [ $2 = "no-continue" ]
 then
@@ -64,5 +65,6 @@ then
         --niter 10 \
         --niter_decay 0 \
         --display_freq 100 \
+        --save_epoch_freq 10 \
         --print_freq 100
 fi
