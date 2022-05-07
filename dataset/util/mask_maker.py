@@ -62,13 +62,19 @@ if __name__ == '__main__':
         image_bboxes = np.array([*bboxes[id]])
         suppressed_bboxes = np.array(NMS(image_bboxes))
 
+
+        image = dataset.loadImgs(ids=id)[0]
+        file_name = image["file_name"]
+
+        height = image["height"]
+        width = image["width"]
+        mask = np.zeros((height, width))
+
         if len(suppressed_bboxes):
-            mask = np.zeros(suppressed_bboxes[0][5]["size"])
 
             for annotation in suppressed_bboxes:
                 mask = mask + decode(annotation[5])    
-        
-            file_name = dataset.loadImgs(ids=id)[0]["file_name"]
-            print(file_name)
-            cv.imwrite(f'../frames/mask/{file_name}.png', mask*255)
+    
+        print(file_name)
+        cv.imwrite(f'../frames/mask/{file_name}.png', mask*255)
 
