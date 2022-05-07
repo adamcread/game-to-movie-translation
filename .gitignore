@@ -10,3 +10,4 @@ venv/
 **/*.pth
 image_translation/datasets/
 image_translation/results/
+**/slurm*

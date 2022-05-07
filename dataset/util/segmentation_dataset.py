@@ -20,7 +20,7 @@ coco_dataset = {
 }
 
 os.chdir('../frames/')
-files = glob.glob('train/train*/*', recursive=True)
+files = glob.glob('train/train*/*', recursive=True)[:10]
 for id, file in enumerate(files):
     print(f'{id} out of {len(files)}')
     image = cv.imread(file)
@@ -43,5 +43,5 @@ for id, file in enumerate(files):
         "area": 0
     })
 
-with open('../annotation/test_segmentation.json', 'w+') as fp:
+with open('../annotation/test_temp.json', 'w+') as fp:
     json.dump(coco_dataset, fp, indent=4)

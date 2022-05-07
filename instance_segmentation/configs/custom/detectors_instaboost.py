@@ -182,7 +182,7 @@ data = dict(
     test=dict(
         img_prefix='../dataset/frames/',
         classes=classes,
-        ann_file='../dataset/annotation/test_segmentation.json'),
+        ann_file='../dataset/annotation/test.json'),
 )
 
 runner = dict(type='EpochBasedRunner', max_epochs=6)

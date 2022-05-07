@@ -22,6 +22,6 @@ source ../venv/bin/activate
 
 python3 tools/test.py \
     "./configs/custom/detectors_instaboost.py" \
-    "./checkpoints/epoch_2.pth" \
+    "./work_dirs/detectors_instaboost/epoch_3.pth" \
     --format-only \
-    --options "jsonfile_prefix=./results"
+    --options "jsonfile_prefix=../dataset/annotation/test"
