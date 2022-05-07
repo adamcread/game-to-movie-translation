@@ -17,6 +17,6 @@
 # Source the bash profile (required to use the module command)
 source /etc/profile
 module load cuda/11.0-cudnn8.0
-source ../venv/bin/activate
+source ../../venv/bin/activate
 
 python3 mask_maker.py
