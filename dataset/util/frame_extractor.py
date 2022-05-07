@@ -1,5 +1,7 @@
 import cv2 as cv
 import os
+import os.path
+
 
 
 # for frame in frames
@@ -15,18 +17,19 @@ for dir in ['trainA', 'trainB']:
     patches = os.listdir(patch_root)
     for i, file in enumerate(images):
         print(f'{i} out of {len(images)}')
-        img = cv.imread(image_root+file)
-        mask = cv.imread(mask_root+file.replace('.jpg', '.png'))
+        if os.path.isfile(mask_root+file.replace('.jpg', '.png')):
+            img = cv.imread(image_root+file)
+            mask = cv.imread(mask_root+file.replace('.jpg', '.png'))
 
-        while counter < len(patches) and file.replace('.jpg', '') == '_'.join(patches[counter].split('_')[:-1]):
-            patch = cv.imread(patch_root+patches[counter])
+            while counter < len(patches) and file.replace('.jpg', '') == '_'.join(patches[counter].split('_')[:-1]):
+                patch = cv.imread(patch_root+patches[counter])
 
-            extracted_patch = cv.bitwise_and(img, patch)
-            cv.imwrite(f'../patches/extracted/{dir}/{patches[counter]}', extracted_patch)
+                extracted_patch = cv.bitwise_and(img, patch)
+                cv.imwrite(f'../patches/extracted/{dir}/{patches[counter]}', extracted_patch)
 
-            counter += 1
+                counter += 1
 
 
-        extracted = cv.bitwise_and(img, mask)
+            extracted = cv.bitwise_and(img, mask)
 
-        cv.imwrite(f'../frames/extracted/{dir}/{file}', extracted)
+            cv.imwrite(f'../frames/extracted/{dir}/{file}', extracted)
