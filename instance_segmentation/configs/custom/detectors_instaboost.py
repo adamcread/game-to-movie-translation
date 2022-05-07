@@ -88,9 +88,9 @@ model = dict(
     )
 )
 
-game_root = "../dataset/frames/trainA/"
+game_root = "../dataset/frames/train/trainA/"
 game_references = random.sample([game_root+x for x in os.listdir(game_root)], k=500)
-movie_root = "../dataset/frames/trainB/"
+movie_root = "../dataset/frames/train/trainB/"
 movie_references = random.sample([movie_root+x for x in os.listdir(movie_root)], k=500)
 train_transforms = [
     dict(
@@ -98,7 +98,7 @@ train_transforms = [
         transforms= [
             dict(
                 type="Compose",
-                transforms=[
+                transforms=[    
                     dict(
                         type="CLAHE", always_apply=True),
                     dict(
