@@ -28,6 +28,7 @@ class UnalignedDataset(BaseDataset):
 
         self.A_paths = sorted(make_dataset(self.dir_A, opt.max_dataset_size))   # load images from '/path/to/data/trainA'
         self.B_paths = sorted(make_dataset(self.dir_B, opt.max_dataset_size))    # load images from '/path/to/data/trainB'
+
         self.A_size = len(self.A_paths)  # get the size of dataset A
         self.B_size = len(self.B_paths)  # get the size of dataset B
         btoA = self.opt.direction == 'BtoA'
@@ -49,18 +50,28 @@ class UnalignedDataset(BaseDataset):
             B_paths (str)    -- image paths
         """
         A_path = self.A_paths[index % self.A_size]  # make sure index is within then range
+        A_mask_path = A_path.replace('train/trainA', 'mask/maskA')
+
         if self.opt.serial_batches:   # make sure index is within then range
             index_B = index % self.B_size
         else:   # randomize the index for domain B to avoid fixed pairs.
             index_B = random.randint(0, self.B_size - 1)
+
         B_path = self.B_paths[index_B]
+        B_mask_path = B_path.replace('train/trainB', 'mask/maskB')
+
         A_img = Image.open(A_path).convert('RGB')
         B_img = Image.open(B_path).convert('RGB')
+
+        A_mask_img = Image.open(A_mask_path).convert('RGB')
+        B_mask_img = Image.open(B_mask_path).convert('RGB')
         # apply image transformation
         A = self.transform_A(A_img)
         B = self.transform_B(B_img)
+        A_mask = self.transform_A(A_mask_img)
+        B_mask = self.transform_B(B_mask_img)
 
-        return {'A': A, 'B': B, 'A_paths': A_path, 'B_paths': B_path}
+        return {'A': A, 'B': B, 'A_mask': A_mask, 'B_mask': B_mask, 'A_paths': A_path, 'B_paths': B_path}
 
     def __len__(self):
         """Return the total number of images in the dataset.
