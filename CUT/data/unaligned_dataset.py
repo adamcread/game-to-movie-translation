@@ -26,6 +26,7 @@ class UnalignedDataset(BaseDataset):
         BaseDataset.__init__(self, opt)
         self.dir_A = os.path.join(opt.dataroot, opt.phase + 'A')  # create a path '/path/to/data/trainA'
         self.dir_B = os.path.join(opt.dataroot, opt.phase + 'B')  # create a path '/path/to/data/trainB'
+        self.L1_mask = opt.L1_mask
 
         if opt.phase == "test" and not os.path.exists(self.dir_A) \
            and os.path.exists(os.path.join(opt.dataroot, "valA")):
@@ -50,19 +51,21 @@ class UnalignedDataset(BaseDataset):
             B_paths (str)    -- image paths
         """
         A_path = self.A_paths[index % self.A_size]  # make sure index is within then range
-        M_A_path = A_path.replace('train/', 'mask/')
 
         if self.opt.serial_batches:   # make sure index is within then range
             index_B = index % self.B_size
         else:   # randomize the index for domain B to avoid fixed pairs.
             index_B = random.randint(0, self.B_size - 1)
         B_path = self.B_paths[index_B]
-        M_B_path = B_path.replace('train/', 'mask/')
+        if self.L1_mask:
+            M_A_path = A_path.replace('train/', 'mask/')
+            M_B_path = B_path.replace('train/', 'mask/')
 
         A_img = Image.open(A_path).convert('RGB')
         B_img = Image.open(B_path).convert('RGB')
-        M_A_img = Image.open(M_A_path).convert('RGB')
-        M_B_img = Image.open(M_B_path).convert('RGB')
+        if self.L1_mask:
+            M_A_img = Image.open(M_A_path).convert('RGB')
+            M_B_img = Image.open(M_B_path).convert('RGB')
 
         # Apply image transformation
         # For FastCUT mode, if in finetuning phase (learning rate is decaying),
@@ -73,10 +76,15 @@ class UnalignedDataset(BaseDataset):
         transform = get_transform(modified_opt)
         A = transform(A_img)
         B = transform(B_img)
-        M_A = transform(M_A_img)
-        M_B = transform(M_B_img)
+        if self.L1_mask:
+            M_A = transform(M_A_img)
+            M_B = transform(M_B_img)
+        
+        if self.L1_mask:
+            return {'A': A, 'B': B, 'M_A':M_A, 'M_B':M_B, 'A_paths': A_path, 'B_paths': B_path, 'M_A_path': M_A_path, 'M_B_path': M_B_path}
+        else:
+            return {'A': A, 'B': B, 'A_paths': A_path, 'B_paths': B_path}
 
-        return {'A': A, 'B': B, 'M_A':M_A, 'M_B':M_B, 'A_paths': A_path, 'B_paths': B_path, 'M_A_path': M_A_path, 'M_B_path': M_B_path}
 
     def __len__(self):
         """Return the total number of images in the dataset.
