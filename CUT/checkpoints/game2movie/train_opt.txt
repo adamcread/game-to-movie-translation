@@ -1,5 +1,5 @@
 ----------------- Options ---------------
-                 CUT_mode: FastCUT                       	[default: CUT]
+                 CUT_mode: CUT                           
                batch_size: 1                             
                     beta1: 0.5                           
                     beta2: 0.999                         
@@ -11,7 +11,7 @@
                 direction: AtoB                          
               display_env: main                          
              display_freq: 400                           
-               display_id: None                          
+               display_id: 0                             	[default: None]
             display_ncols: 4                             
              display_port: 8097                          
            display_server: http://localhost              
@@ -20,27 +20,27 @@
                     epoch: latest                        
               epoch_count: 1                             
           evaluation_freq: 5000                          
-        flip_equivariance: True                          
+        flip_equivariance: False                         
                  gan_mode: lsgan                         
-                  gpu_ids: 0                             
+                  gpu_ids: -1                            	[default: 0]
                 init_gain: 0.02                          
                 init_type: xavier                        
                  input_nc: 3                             
                   isTrain: True                          	[default: None]
                lambda_GAN: 1.0                           
-               lambda_NCE: 10.0                          
+               lambda_NCE: 1.0                           
                 load_size: 286                           
                        lr: 0.0002                        
            lr_decay_iters: 50                            
                 lr_policy: linear                        
          max_dataset_size: inf                           
                     model: cut                           
-                 n_epochs: 150                           
-           n_epochs_decay: 50                            
+                 n_epochs: 200                           
+           n_epochs_decay: 200                           
                n_layers_D: 3                             
                      name: game2movie                    	[default: experiment_name]
                     nce_T: 0.07                          
-                  nce_idt: False                         
+                  nce_idt: True                          
 nce_includes_all_negatives_from_minibatch: False                         
                nce_layers: 0,4,8,12,16                   
                       ndf: 64                            
