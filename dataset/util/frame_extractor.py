@@ -13,14 +13,14 @@ for dir in ['trainB']:
     patch_root= f"../patches/mask/{dir}/"
 
     counter = 0
-    images = os.listdir(image_root)
-    patches = os.listdir(patch_root)
+    images = sorted(os.listdir(image_root))
+    patches = sorted(os.listdir(patch_root))
     for i, file in enumerate(images):
-        print(f'{i} out of {len(images)}')
+        print(f'{i+1} out of {len(images)}')
         if os.path.isfile(mask_root+file.replace('.jpg', '.png')):
             img = cv.imread(image_root+file)
             mask = cv.imread(mask_root+file.replace('.jpg', '.png'))
-
+            
             while counter < len(patches) and file.replace('.jpg', '') == '_'.join(patches[counter].split('_')[:-1]):
                 patch = cv.imread(patch_root+patches[counter])
 
@@ -28,8 +28,8 @@ for dir in ['trainB']:
                 cv.imwrite(f'../patches/extracted/{dir}/{patches[counter]}', extracted_patch)
 
                 counter += 1
+            counter += 1
 
+            # extracted = cv.bitwise_and(img, mask)
 
-            extracted = cv.bitwise_and(img, mask)
-
-            cv.imwrite(f'../frames/extracted/{dir}/{file}', extracted)
+            # cv.imwrite(f'../frames/extracted/{dir}/{file}', extracted)
