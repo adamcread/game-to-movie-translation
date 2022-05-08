@@ -553,24 +553,43 @@ class PatchSampleF(nn.Module):
     def forward(self, feats, num_patches=64, patch_ids=None):
         return_ids = []
         return_feats = []
+
         if self.use_mlp and not self.mlp_init:
             self.create_mlp(feats)
+
         for feat_id, feat in enumerate(feats):
+            # * B x C x H x W
             B, H, W = feat.shape[0], feat.shape[2], feat.shape[3]
+            print("FETURE", feat.shape)
+
+            # * B x (HxW) x C
             feat_reshape = feat.permute(0, 2, 3, 1).flatten(1, 2)
+            print("FETURE RESHAPE", feat_reshape.shape)
+
             if num_patches > 0:
                 if patch_ids is not None:
+                    # * if FAKE (query sample)
                     patch_id = patch_ids[feat_id]
                 else:
+                    # * if REAL (key sample)
                     # torch.randperm produces cudaErrorIllegalAddress for newer versions of PyTorch. https://github.com/taesungp/contrastive-unpaired-translation/issues/83
                     #patch_id = torch.randperm(feat_reshape.shape[1], device=feats[0].device)
+
+                    # * randomise permutation of 1,2,...,HxW
                     patch_id = np.random.permutation(feat_reshape.shape[1])
+                    print("PATCH ID", patch_id.shape)
+
+                    # * select B of the values in the random permutation
                     patch_id = patch_id[:int(min(num_patches, patch_id.shape[0]))]  # .to(patch_ids.device)
+
                 patch_id = torch.tensor(patch_id, dtype=torch.long, device=feat.device)
+                # * select section to get BxB patch
+                # ? pixels are not necessarily contigious
                 x_sample = feat_reshape[:, patch_id, :].flatten(0, 1)  # reshape(-1, x.shape[1])
             else:
                 x_sample = feat_reshape
                 patch_id = []
+
             if self.use_mlp:
                 mlp = getattr(self, 'mlp_%d' % feat_id)
                 x_sample = mlp(x_sample)
@@ -580,6 +599,7 @@ class PatchSampleF(nn.Module):
             if num_patches == 0:
                 x_sample = x_sample.permute(0, 2, 1).reshape([B, x_sample.shape[-1], H, W])
             return_feats.append(x_sample)
+
         return return_feats, return_ids
 
 
@@ -991,14 +1011,18 @@ class ResnetGenerator(nn.Module):
             feat = input
             feats = []
             for layer_id, layer in enumerate(self.model):
+                # ! apply layer by layer
+
                 # print(layer_id, layer)
                 feat = layer(feat)
+                # ! if in NCE layers
                 if layer_id in layers:
                     # print("%d: adding the output of %s %d" % (layer_id, layer.__class__.__name__, feat.size(1)))
                     feats.append(feat)
                 else:
                     # print("%d: skipping %s %d" % (layer_id, layer.__class__.__name__, feat.size(1)))
                     pass
+                # ! if last layer return the feature maps extracted at each NCE layer
                 if layer_id == layers[-1] and encode_only:
                     # print('encoder only return features')
                     return feats  # return intermediate features alone; stop in the last layers

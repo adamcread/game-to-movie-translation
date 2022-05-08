@@ -56,10 +56,13 @@ class CUTModel(BaseModel):
     def __init__(self, opt):
         BaseModel.__init__(self, opt)
 
+        self.L1_mask = opt.L1_mask
+        self.NCE_mask = opt.NCE_mask
+
         # specify the training losses you want to print out.
         # The training/test scripts will call <BaseModel.get_current_losses>
         self.loss_names = ['G_GAN', 'D_real', 'D_fake', 'G', 'NCE']
-        self.visual_names = ['real_A', 'fake_B', 'real_B']
+        self.visual_names = ['real_A', 'fake_B', 'real_B', 'mask']
         self.nce_layers = [int(i) for i in self.opt.nce_layers.split(',')]
 
         if opt.nce_idt and self.isTrain:
@@ -141,6 +144,8 @@ class CUTModel(BaseModel):
         AtoB = self.opt.direction == 'AtoB'
         self.real_A = input['A' if AtoB else 'B'].to(self.device)
         self.real_B = input['B' if AtoB else 'A'].to(self.device)
+        self.mask = input['M_A' if AtoB else 'M_B'].to(self.device)
+
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
 
     def forward(self):
@@ -151,9 +156,11 @@ class CUTModel(BaseModel):
             if self.flipped_for_equivariance:
                 self.real = torch.flip(self.real, [3])
 
+        # fake A | fake B
         self.fake = self.netG(self.real)
         self.fake_B = self.fake[:self.real_A.size(0)]
         if self.opt.nce_idt:
+            # fake A = idt B
             self.idt_B = self.fake[self.real_A.size(0):]
 
     def compute_D_loss(self):
@@ -192,17 +199,27 @@ class CUTModel(BaseModel):
         else:
             loss_NCE_both = self.loss_NCE
 
+        
+        if self.L1_mask:
+            # mask times real
+            # mask times fake
+            pass
+
         self.loss_G = self.loss_G_GAN + loss_NCE_both
         return self.loss_G
 
     def calculate_NCE_loss(self, src, tgt):
         n_layers = len(self.nce_layers)
+        # query features encode -> FAKE 
         feat_q = self.netG(tgt, self.nce_layers, encode_only=True)
 
         if self.opt.flip_equivariance and self.flipped_for_equivariance:
             feat_q = [torch.flip(fq, [3]) for fq in feat_q]
 
+        # key features encode -> REAL
         feat_k = self.netG(src, self.nce_layers, encode_only=True)
+
+        # the query, positive and negative samples are mapped to K-dimensional vectors
         feat_k_pool, sample_ids = self.netF(feat_k, self.opt.num_patches, None)
         feat_q_pool, _ = self.netF(feat_q, self.opt.num_patches, sample_ids)
 

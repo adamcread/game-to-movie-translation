@@ -18,6 +18,7 @@ class PatchNCELoss(nn.Module):
         # pos logit
         l_pos = torch.bmm(
             feat_q.view(num_patches, 1, -1), feat_k.view(num_patches, -1, 1))
+
         l_pos = l_pos.view(num_patches, 1)
 
         # neg logit

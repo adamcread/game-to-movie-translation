@@ -31,10 +31,11 @@ then
         --crop_size 512 \
         --CUT_mode CUT \
         --phase "train" \
-        --n_epochs 25 \
-        --n_epochs_decay 0 \
+        --n_epochs=25 \
+        --n_epochs_decay=0 \
         --display_id=0 \
-        --continue_train
+        # --continue_train \
+        --gpu_ids=-1
 elif [ $1 = 'BtoA' ]
 then 
     python3 train.py \
@@ -51,4 +52,18 @@ then
         --n_epochs_decay 0 \
         --display_id=0 \
         --continue_train
+else
+    python3 train.py \
+        --dataroot "../dataset/frames/train/" \
+        --name "debug" \
+        --batch_size 1 \
+        --preprocess scale_width_and_crop \
+        --load_size 1024 \
+        --crop_size 512 \
+        --direction "BtoA" \
+        --CUT_mode CUT \
+        --phase "train" \
+        --display_id=0 \
+        --n_epochs_decay 0 \
+        --display_id=0 \
 fi
