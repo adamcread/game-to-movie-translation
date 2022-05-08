@@ -27,7 +27,7 @@ then
         --direction "AtoB" \
         --CUT_mode CUT \
         --phase "train" \
-        --gpu_ids=-1 \
+        --display_id=0 \
         # --continue_train
 elif [ $1 = 'BtoA' ]
 then 
@@ -37,5 +37,6 @@ then
         --direction "AtoB" \
         --CUT_mode CUT \
         --phase "train" \
+        --display_id=0 \
         # --continue_train
 fi
