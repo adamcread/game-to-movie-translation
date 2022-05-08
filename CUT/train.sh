@@ -32,7 +32,7 @@ elif [ $1 = 'BtoA' ]
 then 
     python3 train.py \
         --dataroot "../dataset/frames/train/" \
-        --name "game2movie" \
+        --name "movie2game" \
         --direction "AtoB" \
         --CUT_mode CUT \
         --phase "train" \
