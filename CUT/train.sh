@@ -1,3 +1,4 @@
+#!/bin/bash
 # X number of nodes with Y number of cores in each node.
 #SBATCH -N 1
 #SBATCH -c 4
