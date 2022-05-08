@@ -34,8 +34,7 @@ then
         --n_epochs=25 \
         --n_epochs_decay=0 \
         --display_id=0 \
-        # --continue_train \
-        --gpu_ids=-1
+        --continue_train 
 elif [ $1 = 'BtoA' ]
 then 
     python3 train.py \
@@ -65,5 +64,5 @@ else
         --phase "train" \
         --display_id=0 \
         --n_epochs_decay 0 \
-        --display_id=0 \
+        --display_id=0 
 fi
