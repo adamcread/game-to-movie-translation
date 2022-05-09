@@ -588,8 +588,8 @@ class PatchSampleF(nn.Module):
                         msk_indices = msk_indices.squeeze(1).cpu().detach().numpy()
                         patch_id = np.concatenate(
                             (
-                            np.random.permutation(msk_indices)[:int(min(num_patches, patch_id.shape[0]))//2], 
-                            np.random.permutation(non_msk_indices)[:int(min(num_patches, patch_id.shape[0]))//2]
+                            np.random.permutation(msk_indices)[:int(min(max(num_patches-non_msk_indices.shape[0], num_patches//2), msk_indices.shape[0]))], 
+                            np.random.permutation(non_msk_indices)[:int(min(max(num_patches-msk_indices.shape[0], num_patches//2), non_msk_indices.shape[0]))]
                             )
                         )
                     else:
