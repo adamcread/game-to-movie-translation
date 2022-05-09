@@ -24,16 +24,11 @@ then
     python3 train.py \
         --dataroot "../dataset/frames/train/"\
         --name "game2movie" \
-        --direction "AtoB" \
         --batch_size 1 \
-        --preprocess scale_width_and_crop \
-        --load_size 1024 \
-        --crop_size 512 \
+        --direction "AtoB" \
         --CUT_mode CUT \
         --phase "train" \
-        --n_epochs=25 \
-        --n_epochs_decay=0 \
-        --display_id=0 \
+        --display_id 0 \
         --continue_train 
 elif [ $1 = 'BtoA' ]
 then 
@@ -41,28 +36,23 @@ then
         --dataroot "../dataset/frames/train/" \
         --name "movie2game" \
         --batch_size 1 \
-        --preprocess scale_width_and_crop \
-        --load_size 1024 \
-        --crop_size 512 \
         --direction "BtoA" \
         --CUT_mode CUT \
         --phase "train" \
-        --display_id=0 \
-        --n_epochs_decay 0 \
-        --display_id=0 \
+        --display_id 0 \
         --continue_train
 else
     python3 train.py \
         --dataroot "../dataset/frames/train/" \
         --name "debug" \
         --batch_size 1 \
-        --preprocess scale_width_and_crop \
-        --load_size 1024 \
-        --crop_size 512 \
         --direction "BtoA" \
         --CUT_mode CUT \
         --phase "train" \
-        --display_id=0 \
-        --n_epochs_decay 0 \
-        --display_id=0 
+        --display_id 0 \
+        --gpu_ids -1 \
+        --mask \
+        --load_size 520 \
+        --crop_size 512 \
+        --preprocess scale_width_and_crop
 fi

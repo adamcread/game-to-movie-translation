@@ -4,6 +4,9 @@ from .base_model import BaseModel
 from . import networks
 from .patchnce import PatchNCELoss
 import util.util as util
+import torch.nn as nn
+from torchvision.utils import save_image
+
 
 
 class CUTModel(BaseModel):
@@ -56,8 +59,9 @@ class CUTModel(BaseModel):
     def __init__(self, opt):
         BaseModel.__init__(self, opt)
 
-        self.L1_mask = opt.L1_mask
-        self.NCE_mask = opt.NCE_mask
+        self.layer_0 = nn.ReflectionPad2d(3)
+
+        self.mask = opt.mask
 
         # specify the training losses you want to print out.
         # The training/test scripts will call <BaseModel.get_current_losses>
@@ -145,8 +149,9 @@ class CUTModel(BaseModel):
         self.real_A = input['A' if AtoB else 'B'].to(self.device)
         self.real_B = input['B' if AtoB else 'A'].to(self.device)
 
-        if self.L1_mask:
-            self.mask = input['M_A' if AtoB else 'M_B'].to(self.device)
+        if self.mask:
+            self.mask_A = input['M_A' if AtoB else 'M_B'].to(self.device)
+            self.mask_B = input['M_B' if AtoB else 'M_A'].to(self.device)
 
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
 
@@ -191,26 +196,24 @@ class CUTModel(BaseModel):
             self.loss_G_GAN = 0.0
 
         if self.opt.lambda_NCE > 0.0:
-            self.loss_NCE = self.calculate_NCE_loss(self.real_A, self.fake_B)
+            if not self.mask:
+                self.loss_NCE = self.calculate_NCE_loss(self.real_A, self.fake_B)
+            else:
+                self.loss_NCE = self.calculate_NCE_loss(self.real_A, self.fake_B, self.mask_A)
+
         else:
             self.loss_NCE, self.loss_NCE_bd = 0.0, 0.0
 
         if self.opt.nce_idt and self.opt.lambda_NCE > 0.0:
-            self.loss_NCE_Y = self.calculate_NCE_loss(self.real_B, self.idt_B)
+            self.loss_NCE_Y = self.calculate_NCE_loss(self.real_B, self.idt_B, self.mask_B)
             loss_NCE_both = (self.loss_NCE + self.loss_NCE_Y) * 0.5
         else:
             loss_NCE_both = self.loss_NCE
 
-        
-        if self.L1_mask:
-            # mask times real
-            # mask times fake
-            pass
-
         self.loss_G = self.loss_G_GAN + loss_NCE_both
         return self.loss_G
 
-    def calculate_NCE_loss(self, src, tgt):
+    def calculate_NCE_loss(self, src, tgt, msk=None):
         n_layers = len(self.nce_layers)
         # query features encode -> FAKE 
         feat_q = self.netG(tgt, self.nce_layers, encode_only=True)
@@ -221,11 +224,28 @@ class CUTModel(BaseModel):
         # key features encode -> REAL
         feat_k = self.netG(src, self.nce_layers, encode_only=True)
 
-        # the query, positive and negative samples are mapped to K-dimensional vectors
-        feat_k_pool, sample_ids = self.netF(feat_k, self.opt.num_patches, None)
-        feat_q_pool, _ = self.netF(feat_q, self.opt.num_patches, sample_ids)
+        if not self.mask:
+            feat_k_pool, sample_ids = self.netF(feat_k, self.opt.num_patches, None)
+            feat_q_pool, _ = self.netF(feat_q, self.opt.num_patches, sample_ids)
+        else:
+            # the query, positive and negative samples are mapped to K-dimensional vectors
+
+            squeeze_mask = self.layer_0(msk).squeeze()
+            unbound_mask, _, _ = squeeze_mask.unbind(0)
+            flattened_mask = unbound_mask.flatten()
+            object_indices = flattened_mask.nonzero()
+
+            # 262x518 - x1
+            # 256x512 - x
+            # 128x256
+            # 64x128
+
+            feat_k_pool, sample_ids = self.netF(feat_k, self.opt.num_patches, None)
+            feat_q_pool, _ = self.netF(feat_q, self.opt.num_patches, sample_ids)
 
         total_nce_loss = 0.0
+        # ! at each feature layer make some extraction from key
+        # ! check each of those extractions against query
         for f_q, f_k, crit, nce_layer in zip(feat_q_pool, feat_k_pool, self.criterionNCE, self.nce_layers):
             loss = crit(f_q, f_k) * self.opt.lambda_NCE
             total_nce_loss += loss.mean()

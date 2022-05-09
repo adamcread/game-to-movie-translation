@@ -16,6 +16,7 @@ class PatchNCELoss(nn.Module):
         feat_k = feat_k.detach()
 
         # pos logit
+        # ! calculate similarity using batch matrix multiplication
         l_pos = torch.bmm(
             feat_q.view(num_patches, 1, -1), feat_k.view(num_patches, -1, 1))
 
@@ -50,6 +51,7 @@ class PatchNCELoss(nn.Module):
 
         out = torch.cat((l_pos, l_neg), dim=1) / self.opt.nce_T
 
+        # ! cross-entropy loss against thing
         loss = self.cross_entropy_loss(out, torch.zeros(out.size(0), dtype=torch.long,
                                                         device=feat_q.device))
 

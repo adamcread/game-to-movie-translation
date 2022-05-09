@@ -6,6 +6,8 @@ import functools
 from torch.optim import lr_scheduler
 import numpy as np
 from .stylegan_networks import StyleGAN2Discriminator, StyleGAN2Generator, TileStyleGAN2Discriminator
+from torchvision.utils import save_image
+
 
 ###############################################################################
 # Helper Functions
@@ -276,7 +278,7 @@ def define_F(input_nc, netF, norm='batch', use_dropout=False, init_type='normal'
     elif netF == 'sample':
         net = PatchSampleF(use_mlp=False, init_type=init_type, init_gain=init_gain, gpu_ids=gpu_ids, nc=opt.netF_nc)
     elif netF == 'mlp_sample':
-        net = PatchSampleF(use_mlp=True, init_type=init_type, init_gain=init_gain, gpu_ids=gpu_ids, nc=opt.netF_nc)
+        net = PatchSampleF(use_mlp=True, init_type=init_type, init_gain=init_gain, gpu_ids=gpu_ids, nc=opt.netF_nc, mask=opt.mask)
     elif netF == 'strided_conv':
         net = StridedConvF(init_type=init_type, init_gain=init_gain, gpu_ids=gpu_ids)
     else:
@@ -529,7 +531,7 @@ class StridedConvF(nn.Module):
 
 
 class PatchSampleF(nn.Module):
-    def __init__(self, use_mlp=False, init_type='normal', init_gain=0.02, nc=256, gpu_ids=[]):
+    def __init__(self, use_mlp=False, init_type='normal', init_gain=0.02, nc=256, gpu_ids=[], mask=False):
         # potential issues: currently, we use the same patch_ids for multiple images in the batch
         super(PatchSampleF, self).__init__()
         self.l2norm = Normalize(2)
@@ -550,7 +552,7 @@ class PatchSampleF(nn.Module):
         init_net(self, self.init_type, self.init_gain, self.gpu_ids)
         self.mlp_init = True
 
-    def forward(self, feats, num_patches=64, patch_ids=None):
+    def forward(self, feats, num_patches=64, patch_ids=None, oversample_indices=None):
         return_ids = []
         return_feats = []
 
@@ -559,12 +561,15 @@ class PatchSampleF(nn.Module):
 
         for feat_id, feat in enumerate(feats):
             # * B x C x H x W
+            print("ID", feat_id)
+            print("feat shape", feat.shape)
+            if feat_id == 0:
+                save_image(feat, 'feature.png')
+
             B, H, W = feat.shape[0], feat.shape[2], feat.shape[3]
-            print("FETURE", feat.shape)
 
             # * B x (HxW) x C
             feat_reshape = feat.permute(0, 2, 3, 1).flatten(1, 2)
-            print("FETURE RESHAPE", feat_reshape.shape)
 
             if num_patches > 0:
                 if patch_ids is not None:
@@ -577,9 +582,8 @@ class PatchSampleF(nn.Module):
 
                     # * randomise permutation of 1,2,...,HxW
                     patch_id = np.random.permutation(feat_reshape.shape[1])
-                    print("PATCH ID", patch_id.shape)
 
-                    # * select B of the values in the random permutation
+                    # * select num patches from HxW options
                     patch_id = patch_id[:int(min(num_patches, patch_id.shape[0]))]  # .to(patch_ids.device)
 
                 patch_id = torch.tensor(patch_id, dtype=torch.long, device=feat.device)

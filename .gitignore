@@ -9,3 +9,4 @@ coco/segmentations_filtered/
 venv/
 **/*.pth
 **/slurm*
+CUT/checkpoints/
