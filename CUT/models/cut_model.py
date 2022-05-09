@@ -66,7 +66,7 @@ class CUTModel(BaseModel):
         # specify the training losses you want to print out.
         # The training/test scripts will call <BaseModel.get_current_losses>
         self.loss_names = ['G_GAN', 'D_real', 'D_fake', 'G', 'NCE']
-        self.visual_names = ['real_A', 'fake_B', 'real_B', 'mask']
+        self.visual_names = ['real_A', 'fake_B', 'real_B']
         self.nce_layers = [int(i) for i in self.opt.nce_layers.split(',')]
 
         if opt.nce_idt and self.isTrain:
@@ -232,15 +232,15 @@ class CUTModel(BaseModel):
 
             squeeze_mask = self.layer_0(msk).squeeze()
             unbound_mask, _, _ = squeeze_mask.unbind(0)
-            flattened_mask = unbound_mask.flatten()
-            object_indices = flattened_mask.nonzero()
+            # mask_indices = unbound_mask.nonzero()
+            # flattened_mask = unbound_mask.flatten()
 
             # 262x518 - x1
             # 256x512 - x
             # 128x256
             # 64x128
 
-            feat_k_pool, sample_ids = self.netF(feat_k, self.opt.num_patches, None)
+            feat_k_pool, sample_ids = self.netF(feat_k, self.opt.num_patches, None, unbound_mask)
             feat_q_pool, _ = self.netF(feat_q, self.opt.num_patches, sample_ids)
 
         total_nce_loss = 0.0

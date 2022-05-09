@@ -27,6 +27,7 @@ if __name__ == '__main__':
         epoch_iter = 0                  # the number of training iterations in current epoch, reset to 0 every epoch
         visualizer.reset()              # reset the visualizer: make sure it saves the results to HTML at least once every epoch
         print("epochs ", opt.n_epochs + opt.n_epochs_decay + 1)
+        print("mask", opt.mask)
 
         dataset.set_epoch(epoch)
         for i, data in enumerate(dataset):  # inner loop within one epoch

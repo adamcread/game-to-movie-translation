@@ -50,7 +50,7 @@ else
         --phase "train" \
         --display_id 0 \
         --gpu_ids -1 \
-        --mask \
+        --mask 1 \
         --load_size 520 \
         --crop_size 512 \
         --preprocess scale_width_and_crop

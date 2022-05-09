@@ -541,6 +541,7 @@ class PatchSampleF(nn.Module):
         self.init_type = init_type
         self.init_gain = init_gain
         self.gpu_ids = gpu_ids
+        self.mask = mask
 
     def create_mlp(self, feats):
         for mlp_id, feat in enumerate(feats):
@@ -552,9 +553,13 @@ class PatchSampleF(nn.Module):
         init_net(self, self.init_type, self.init_gain, self.gpu_ids)
         self.mlp_init = True
 
-    def forward(self, feats, num_patches=64, patch_ids=None, oversample_indices=None):
+    def forward(self, feats, num_patches=64, patch_ids=None, mask=None):
         return_ids = []
         return_feats = []
+
+        if self.mask:
+            mask_H = mask.shape[0]
+            mask_W = mask.shape[0]
 
         if self.use_mlp and not self.mlp_init:
             self.create_mlp(feats)
