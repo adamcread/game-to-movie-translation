@@ -2,6 +2,9 @@ _base_ = [
     '../swin_transformer/swin-tiny_16xb64_in1k.py'
 ]
 
+load_from = './checkpoints/swin_small_224_b16x64_300e_imagenet_20210615_110219-7f9d988b.pth'
+
+
 model = dict(
     head=dict(
         num_classes=5)
@@ -10,6 +13,7 @@ model = dict(
         dict(type='BatchMixup', alpha=0.8, num_classes=5, prob=0.5),
         dict(type='BatchCutMix', alpha=1.0, num_classes=5, prob=0.5)])
     )
+    
 data = dict(
     samples_per_gpu=64,
     workers_per_gpu=8,
