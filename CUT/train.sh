@@ -30,7 +30,7 @@ if [ $1 = 'AtoB' ]
 then
     python3 train.py \
         --dataroot "../dataset/frames/train/"\
-        --name "game2movie" \
+        --name "game2movie_"$2 \
         --batch_size 1 \
         --direction "AtoB" \
         --CUT_mode CUT \
@@ -44,7 +44,7 @@ elif [ $1 = 'BtoA' ]
 then 
     python3 train.py \
         --dataroot "../dataset/frames/train/" \
-        --name "movie2game" \
+        --name "movie2game_"$2 \
         --batch_size 1 \
         --direction "BtoA" \
         --CUT_mode CUT \
