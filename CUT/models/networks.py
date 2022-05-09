@@ -583,8 +583,8 @@ class PatchSampleF(nn.Module):
             
                     # # * randomise permutation of 1,2,...,HxW
                     if use_mask:
-                        msk_indices = msk_indices.detach().numpy()
-                        patch_id = np.random.shuffle(np.concatenate((np.random.permutation(feat_reshape.shape[1]),msk_indices)))
+                        msk_indices = msk_indices.cpu().detach().numpy()
+                        patch_id = np.random.shuffle(np.concatenate((np.random.permutation(feat_reshape.shape[1]), msk_indices)))
                     else:
                         patch_id = np.random.permutation(feat_reshape.shape[1])
 
