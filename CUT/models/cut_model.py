@@ -227,12 +227,12 @@ class CUTModel(BaseModel):
         # key features encode -> REAL
         feat_k = self.netG(src, self.nce_layers, encode_only=True)
 
-        if not self.mask:
-            feat_k_pool, sample_ids = self.netF(feat_k, self.opt.num_patches, None)
-            feat_q_pool, _ = self.netF(feat_q, self.opt.num_patches, sample_ids)
-        else:            
+        if self.mask:
             msk = self.layer_0(msk)
             feat_k_pool, sample_ids = self.netF(feat_k, self.opt.num_patches, None, self.mask, msk)
+            feat_q_pool, _ = self.netF(feat_q, self.opt.num_patches, sample_ids)
+        else:            
+            feat_k_pool, sample_ids = self.netF(feat_k, self.opt.num_patches, None)
             feat_q_pool, _ = self.netF(feat_q, self.opt.num_patches, sample_ids)
 
         total_nce_loss = 0.0

@@ -580,21 +580,23 @@ class PatchSampleF(nn.Module):
                     # * if REAL (key sample)
                     # torch.randperm produces cudaErrorIllegalAddress for newer versions of PyTorch. https://github.com/taesungp/contrastive-unpaired-translation/issues/83
                     #patch_id = torch.randperm(feat_reshape.shape[1], device=feats[0].device)
-                    probs = torch.ones(feat_reshape.shape[1])
-                    if use_mask:
-                        probs[msk_indices] = 2
-                    probs = F.softmax(probs, dim=0, dtype=torch.float64)
-                    probs /= sum(probs)
+                    # probs = torch.ones(feat_reshape.shape[1])
+                    # if use_mask:
+                    #     probs[msk_indices] = 2
+                    # probs = F.softmax(probs, dim=0, dtype=torch.float64)
+                    # probs /= sum(probs)
 
                     # * randomise permutation of 1,2,...,HxW
-                    patch_id = np.random.choice(
-                        range(feat_reshape.shape[1]), 
-                        size=int(min(num_patches, feat_reshape.shape[1])),
-                        p=probs
-                    ) 
+                    # patch_id = np.random.choice(
+                    #     range(feat_reshape.shape[1]), 
+                    #     size=int(min(num_patches, feat_reshape.shape[1])),
+                    #     p=probs
+                    # ) 
+                    patch_id = np.random.permutation(feat_reshape.shape[1])
+        
 
                     # * select num patches from HxW options
-                    # patch_id = patch_id[:int(min(num_patches, patch_id.shape[0]))]  # .to(patch_ids.device)
+                    patch_id = patch_id[:int(min(num_patches, patch_id.shape[0]))]  # .to(patch_ids.device)
 
                 patch_id = torch.tensor(patch_id, dtype=torch.long, device=feat.device)
                 # * select section to get BxB patch
