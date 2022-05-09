@@ -1,0 +1,5 @@
+full-body-sitting
+full-body-standing
+half-body
+head-only
+other
