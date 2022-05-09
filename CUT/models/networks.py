@@ -614,8 +614,8 @@ class PatchSampleF(nn.Module):
                 x_sample = x_sample.permute(0, 2, 1).reshape([B, x_sample.shape[-1], H, W])
             return_feats.append(x_sample)
 
-            patch_id.detach()
-            x_sample.detach()
+            patch_id = patch_id.detach()
+            patch_id = x_sample.detach()
 
         return return_feats, return_ids
 
