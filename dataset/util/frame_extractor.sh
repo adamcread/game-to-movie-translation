@@ -4,12 +4,12 @@
 #SBATCH -c 4
 
 # partition time limit and resource limit for the job
-#SBATCH --gres=gpu
-#SBATCH -p ug-gpu-small	
+# --gres=gpu
+# -p ug-gpu-small	
+#SBATCH -p cpu	
 #SBATCH --mem=28g
-#SBATCH --qos=long-high-prio
-#SBATCH -t 07-00:00:00
-#SBATCH --nodelist=gpu12
+#SBATCH --qos=debug
+#SBATCH -t 00-01:00:00
 
 # job name
 #SBATCH --job-name=frame_extractor
