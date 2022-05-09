@@ -38,6 +38,7 @@ then
         --mask ${mask} \
         --load_size 512 \
         --crop_size 512 \
+        --n_epochs $3 \
         --display_id 0 \
         --continue_train 
 elif [ $1 = 'BtoA' ]
@@ -52,6 +53,7 @@ then
         --mask ${mask} \
         --load_size 512 \
         --crop_size 512 \
+        --n_epochs $3 \
         --display_id 0 \
         --continue_train
 else

@@ -7,6 +7,7 @@ from torch.optim import lr_scheduler
 import numpy as np
 from .stylegan_networks import StyleGAN2Discriminator, StyleGAN2Generator, TileStyleGAN2Discriminator
 from torchvision.utils import save_image
+from ordered_set import OrderedSet
 
 
 ###############################################################################
@@ -585,7 +586,7 @@ class PatchSampleF(nn.Module):
                     if use_mask:
                         msk_indices = msk_indices.squeeze(1).cpu().detach().numpy()
                         patch_id = np.concatenate((np.random.permutation(feat_reshape.shape[1]), msk_indices))
-                        np.random.shuffle(patch_id)
+                        np.random.shuffle(list(OrderedSet(patch_id)))
                     else:
                         patch_id = np.random.permutation(feat_reshape.shape[1])
 
