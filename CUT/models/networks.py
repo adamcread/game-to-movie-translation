@@ -593,8 +593,6 @@ class PatchSampleF(nn.Module):
                     #     p=probs
                     # ) 
                     patch_id = np.random.permutation(feat_reshape.shape[1])
-        
-
                     # * select num patches from HxW options
                     patch_id = patch_id[:int(min(num_patches, patch_id.shape[0]))]  # .to(patch_ids.device)
 

@@ -234,6 +234,7 @@ class CUTModel(BaseModel):
         else:            
             feat_k_pool, sample_ids = self.netF(feat_k, self.opt.num_patches, None)
             feat_q_pool, _ = self.netF(feat_q, self.opt.num_patches, sample_ids)
+        del sample_ids
 
         total_nce_loss = 0.0
         # ! at each feature layer make some extraction from key
