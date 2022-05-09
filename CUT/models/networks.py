@@ -568,7 +568,7 @@ class PatchSampleF(nn.Module):
                 feat_msk, _, _ = F.interpolate(msk, scale_factor=scale, mode='area').squeeze().unbind(0)
                 flat_msk = feat_msk.flatten()
                 msk_indices = torch.nonzero(flat_msk)
-                non_msk_indices = torch.nonzero((flat_msk == 0))
+                non_msk_indices = torch.nonzero(1-flat_msk)
 
 
             # * B x (HxW) x C
