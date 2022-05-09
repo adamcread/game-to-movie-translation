@@ -18,6 +18,14 @@ source /etc/profile
 module load cuda/11.0-cudnn8.0
 source ../venv/bin/activate
 
+if [ $2 = 'mask' ]
+then 
+    mask=1
+elif [ $2 = 'no-mask' ]
+then 
+    mask=0
+fi
+
 if [ $1 = 'AtoB' ]
 then
     python3 train.py \
@@ -27,6 +35,9 @@ then
         --direction "AtoB" \
         --CUT_mode CUT \
         --phase "train" \
+        --mask ${mask} \
+        --load_size 512 \
+        --crop_size 512 \
         --display_id 0 \
         --continue_train 
 elif [ $1 = 'BtoA' ]
@@ -38,6 +49,9 @@ then
         --direction "BtoA" \
         --CUT_mode CUT \
         --phase "train" \
+        --mask ${mask} \
+        --load_size 512 \
+        --crop_size 512 \
         --display_id 0 \
         --continue_train
 else
@@ -50,7 +64,7 @@ else
         --phase "train" \
         --display_id 0 \
         --gpu_ids -1 \
-        --mask 1 \
+        --mask ${mask} \
         --load_size 520 \
         --crop_size 512 \
         --preprocess scale_width_and_crop

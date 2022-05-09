@@ -531,7 +531,7 @@ class StridedConvF(nn.Module):
 
 
 class PatchSampleF(nn.Module):
-    def __init__(self, use_mlp=False, init_type='normal', init_gain=0.02, nc=256, gpu_ids=[], mask=False):
+    def __init__(self, use_mlp=False, init_type='normal', init_gain=0.02, nc=256, gpu_ids=[], mask=0):
         # potential issues: currently, we use the same patch_ids for multiple images in the batch
         super(PatchSampleF, self).__init__()
         self.l2norm = Normalize(2)
@@ -541,7 +541,6 @@ class PatchSampleF(nn.Module):
         self.init_type = init_type
         self.init_gain = init_gain
         self.gpu_ids = gpu_ids
-        self.mask = mask
 
     def create_mlp(self, feats):
         for mlp_id, feat in enumerate(feats):
@@ -553,25 +552,22 @@ class PatchSampleF(nn.Module):
         init_net(self, self.init_type, self.init_gain, self.gpu_ids)
         self.mlp_init = True
 
-    def forward(self, feats, num_patches=64, patch_ids=None, mask=None):
+    def forward(self, feats, num_patches=64, patch_ids=None, use_mask=0, msk=None):
         return_ids = []
         return_feats = []
-
-        if self.mask:
-            mask_H = mask.shape[0]
-            mask_W = mask.shape[0]
 
         if self.use_mlp and not self.mlp_init:
             self.create_mlp(feats)
 
         for feat_id, feat in enumerate(feats):
             # * B x C x H x W
-            print("ID", feat_id)
-            print("feat shape", feat.shape)
-            if feat_id == 0:
-                save_image(feat, 'feature.png')
-
             B, H, W = feat.shape[0], feat.shape[2], feat.shape[3]
+            if use_mask:
+                scale = H/msk.shape[2]
+                feat_msk, _, _ = F.interpolate(msk, scale_factor=scale, mode='area').squeeze().unbind(0)
+                flat_msk = feat_msk.flatten()
+                msk_indices = flat_msk.nonzero()
+
 
             # * B x (HxW) x C
             feat_reshape = feat.permute(0, 2, 3, 1).flatten(1, 2)
@@ -584,12 +580,21 @@ class PatchSampleF(nn.Module):
                     # * if REAL (key sample)
                     # torch.randperm produces cudaErrorIllegalAddress for newer versions of PyTorch. https://github.com/taesungp/contrastive-unpaired-translation/issues/83
                     #patch_id = torch.randperm(feat_reshape.shape[1], device=feats[0].device)
+                    probs = torch.ones(feat_reshape.shape[1])
+                    if use_mask:
+                        probs[msk_indices] = 2
+                    probs = F.softmax(probs, dim=0, dtype=torch.float64)
+                    probs /= sum(probs)
 
                     # * randomise permutation of 1,2,...,HxW
-                    patch_id = np.random.permutation(feat_reshape.shape[1])
+                    patch_id = np.random.choice(
+                        range(feat_reshape.shape[1]), 
+                        size=int(min(num_patches, feat_reshape.shape[1])),
+                        p=probs
+                    ) 
 
                     # * select num patches from HxW options
-                    patch_id = patch_id[:int(min(num_patches, patch_id.shape[0]))]  # .to(patch_ids.device)
+                    # patch_id = patch_id[:int(min(num_patches, patch_id.shape[0]))]  # .to(patch_ids.device)
 
                 patch_id = torch.tensor(patch_id, dtype=torch.long, device=feat.device)
                 # * select section to get BxB patch

@@ -196,16 +196,19 @@ class CUTModel(BaseModel):
             self.loss_G_GAN = 0.0
 
         if self.opt.lambda_NCE > 0.0:
-            if not self.mask:
-                self.loss_NCE = self.calculate_NCE_loss(self.real_A, self.fake_B)
-            else:
+            if self.mask:
                 self.loss_NCE = self.calculate_NCE_loss(self.real_A, self.fake_B, self.mask_A)
-
+            else:
+                self.loss_NCE = self.calculate_NCE_loss(self.real_A, self.fake_B)
         else:
             self.loss_NCE, self.loss_NCE_bd = 0.0, 0.0
 
         if self.opt.nce_idt and self.opt.lambda_NCE > 0.0:
-            self.loss_NCE_Y = self.calculate_NCE_loss(self.real_B, self.idt_B, self.mask_B)
+            if self.mask:
+                self.loss_NCE_Y = self.calculate_NCE_loss(self.real_B, self.idt_B, self.mask_B)
+            else:
+                self.loss_NCE_Y = self.calculate_NCE_loss(self.real_B, self.idt_B)
+
             loss_NCE_both = (self.loss_NCE + self.loss_NCE_Y) * 0.5
         else:
             loss_NCE_both = self.loss_NCE
@@ -227,20 +230,9 @@ class CUTModel(BaseModel):
         if not self.mask:
             feat_k_pool, sample_ids = self.netF(feat_k, self.opt.num_patches, None)
             feat_q_pool, _ = self.netF(feat_q, self.opt.num_patches, sample_ids)
-        else:
-            # the query, positive and negative samples are mapped to K-dimensional vectors
-
-            squeeze_mask = self.layer_0(msk).squeeze()
-            unbound_mask, _, _ = squeeze_mask.unbind(0)
-            # mask_indices = unbound_mask.nonzero()
-            # flattened_mask = unbound_mask.flatten()
-
-            # 262x518 - x1
-            # 256x512 - x
-            # 128x256
-            # 64x128
-
-            feat_k_pool, sample_ids = self.netF(feat_k, self.opt.num_patches, None, unbound_mask)
+        else:            
+            msk = self.layer_0(msk)
+            feat_k_pool, sample_ids = self.netF(feat_k, self.opt.num_patches, None, self.mask, msk)
             feat_q_pool, _ = self.netF(feat_q, self.opt.num_patches, sample_ids)
 
         total_nce_loss = 0.0
