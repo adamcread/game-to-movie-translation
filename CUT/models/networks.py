@@ -586,7 +586,7 @@ class PatchSampleF(nn.Module):
                     # probs = F.softmax(probs, dim=0, dtype=torch.float64)
                     # probs /= sum(probs)
 
-                    # * randomise permutation of 1,2,...,HxW
+                    # # * randomise permutation of 1,2,...,HxW
                     # patch_id = np.random.choice(
                     #     range(feat_reshape.shape[1]), 
                     #     size=int(min(num_patches, feat_reshape.shape[1])),
@@ -613,6 +613,9 @@ class PatchSampleF(nn.Module):
             if num_patches == 0:
                 x_sample = x_sample.permute(0, 2, 1).reshape([B, x_sample.shape[-1], H, W])
             return_feats.append(x_sample)
+
+            patch_id.detach()
+            x_sample.detach()
 
         return return_feats, return_ids
 
