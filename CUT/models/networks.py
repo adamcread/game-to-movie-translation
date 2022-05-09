@@ -568,6 +568,7 @@ class PatchSampleF(nn.Module):
                 feat_msk, _, _ = F.interpolate(msk, scale_factor=scale, mode='area').squeeze().unbind(0)
                 flat_msk = feat_msk.flatten()
                 msk_indices = torch.nonzero(flat_msk)
+                non_msk_indices = torch.nonzero((flat_msk == 0))
 
 
             # * B x (HxW) x C
@@ -585,13 +586,16 @@ class PatchSampleF(nn.Module):
                     # # * randomise permutation of 1,2,...,HxW
                     if use_mask:
                         msk_indices = msk_indices.squeeze(1).cpu().detach().numpy()
-                        patch_id = np.concatenate((np.random.permutation(feat_reshape.shape[1]), msk_indices))
-                        np.random.shuffle(list(OrderedSet(patch_id)))
+                        patch_id = np.concatenate(
+                            (
+                            np.random.permutation(msk_indices)[:int(min(num_patches, patch_id.shape[0]))//2], 
+                            np.random.permutation(non_msk_indices)[:int(min(num_patches, patch_id.shape[0]))//2]
+                            )
+                        )
                     else:
                         patch_id = np.random.permutation(feat_reshape.shape[1])
+                        patch_id = patch_id[:int(min(num_patches, patch_id.shape[0]))]  # .to(patch_ids.device)
 
-                    # * select num patches from HxW options
-                    patch_id = patch_id[:int(min(num_patches, patch_id.shape[0]))]  # .to(patch_ids.device)
 
                 patch_id = torch.tensor(patch_id, dtype=torch.long, device=feat.device)
                 # * select section to get BxB patch
