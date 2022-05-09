@@ -567,8 +567,8 @@ class PatchSampleF(nn.Module):
                 scale = H/msk.shape[2]
                 feat_msk, _, _ = F.interpolate(msk, scale_factor=scale, mode='area').squeeze().unbind(0)
                 flat_msk = feat_msk.flatten()
-                msk_indices = torch.nonzero(flat_msk)
-                non_msk_indices = torch.nonzero(1-flat_msk)
+                msk_indices = torch.nonzero(flat_msk).cpu.detach()
+                non_msk_indices = torch.nonzero(1-flat_msk).cpu().detach()
 
 
             # * B x (HxW) x C
@@ -585,7 +585,6 @@ class PatchSampleF(nn.Module):
             
                     # # * randomise permutation of 1,2,...,HxW
                     if use_mask:
-                        msk_indices = msk_indices.squeeze(1).cpu().detach().numpy()
                         patch_id = np.concatenate(
                             (
                             np.random.permutation(msk_indices)[:int(min(max(num_patches-non_msk_indices.shape[0], num_patches//2), msk_indices.shape[0]))], 
