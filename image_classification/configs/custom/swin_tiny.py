@@ -28,4 +28,4 @@ data = dict(
         data_prefix='../dataset/patches/classified/val/',
         ann_file='../dataset/annotation/classes/val.txt'))
 
-evaluation = dict(interval=30, metric='accuracy')
+evaluation = dict(interval=5, metric='accuracy')
