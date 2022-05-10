@@ -285,8 +285,8 @@ data = dict(
         classes='../dataset/annotation/classes.txt'),
     test=dict(
         type='ImageNet',
-        data_prefix='../dataset/patches/classified/val/',
-        ann_file='../dataset/annotation/classes/val.txt',
+        data_prefix='../dataset/patches/extracted/',
+        ann_file='../dataset/annotation/test.txt',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(
