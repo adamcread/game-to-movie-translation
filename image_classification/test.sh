@@ -19,7 +19,7 @@ source /etc/profile
 module load cuda/11.0-cudnn8.0
 source ../venv/bin/activate
 
-python3 tools/train.py "./configs/custom/swin_tiny.py" \
+python3 tools/test.py "./configs/custom/swin_tiny.py" \
     "./work_dirs/swin_tiny/best.pth" \
     --out "./classification_results.json" \
     --out-items "all"
