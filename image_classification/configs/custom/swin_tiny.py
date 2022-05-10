@@ -30,6 +30,6 @@ data = dict(
         type='ImageNet',
         classes='../dataset/annotation/classes.txt',
         data_prefix='../dataset/patches/extracted/',
-        ann_file='../dataset/annotation/classes/test.txt'))
+        ann_file='../dataset/annotation/test.txt'))
 
 evaluation = dict(interval=5, metric='accuracy')
