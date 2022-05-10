@@ -27,34 +27,44 @@ then
     mask=0
 fi
 
+if [ $3 = 'sample' ]
+then 
+    sample=1
+elif [ $3 = 'no-sample' ]
+then 
+    sample=0
+fi
+
 if [ $1 = 'AtoB' ]
 then
     python3 train.py \
         --dataroot "../dataset/frames/train/"\
-        --name "game2movie_"$2 \
+        --name "game2movie_"$2"_"$3 \
         --batch_size 1 \
         --direction "AtoB" \
         --CUT_mode CUT \
         --phase "train" \
         --mask ${mask} \
-        --load_size 512 \
+        --sample_file ${sample} \
+        --load_size 600 \
         --crop_size 512 \
-        --n_epochs $3 \
+        --n_epochs $4 \
         --display_id 0 \
         --continue_train 
 elif [ $1 = 'BtoA' ]
 then 
     python3 train.py \
         --dataroot "../dataset/frames/train/" \
-        --name "movie2game_"$2 \
+        --name "movie2game_"$2"_"$3 \
         --batch_size 1 \
         --direction "BtoA" \
         --CUT_mode CUT \
         --phase "train" \
         --mask ${mask} \
-        --load_size 512 \
+        --sample_file ${sample} \
+        --load_size 600 \
         --crop_size 512 \
-        --n_epochs $3 \
+        --n_epochs $4 \
         --display_id 0 \
         --continue_train
 else
@@ -70,5 +80,5 @@ else
         --mask ${mask} \
         --load_size 520 \
         --crop_size 512 \
-        --sample_file 1
+        
 fi
