@@ -21,15 +21,25 @@ def is_image_file(filename):
     return any(filename.endswith(extension) for extension in IMG_EXTENSIONS)
 
 
-def make_dataset(dir, max_dataset_size=float("inf")):
+def make_dataset(dir, max_dataset_size=float("inf"), sample_file=0):
     images = []
     assert os.path.isdir(dir) or os.path.islink(dir), '%s is not a valid directory' % dir
 
-    for root, _, fnames in sorted(os.walk(dir, followlinks=True)):
-        for fname in fnames:
-            if is_image_file(fname):
-                path = os.path.join(root, fname)
-                images.append(path)
+    if sample_file:
+        root_file = dir.replace('frames/train/', 'annotation/')+'.txt'
+        files = open(root_file, 'r').readlines()
+
+        for f in files:
+            f = f.rstrip()
+            if is_image_file(f):
+                images.append(f"{dir}/{f.replace('.png', '.jpg')}")
+    else:
+        for root, _, fnames in sorted(os.walk(dir, followlinks=True)):
+            for fname in fnames:
+                if is_image_file(fname):
+                    path = os.path.join(root, fname)
+                    images.append(path)
+
     return images[:min(max_dataset_size, len(images))]
 
 

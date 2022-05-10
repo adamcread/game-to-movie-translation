@@ -70,5 +70,5 @@ else
         --mask ${mask} \
         --load_size 520 \
         --crop_size 512 \
-        --preprocess scale_width_and_crop
+        --sample_file 1
 fi
