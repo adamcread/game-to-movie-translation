@@ -13,7 +13,7 @@ model = dict(
         dict(type='BatchMixup', alpha=0.8, num_classes=5, prob=0.5),
         dict(type='BatchCutMix', alpha=1.0, num_classes=5, prob=0.5)])
     )
-    
+
 data = dict(
     samples_per_gpu=64,
     workers_per_gpu=8,
@@ -29,7 +29,7 @@ data = dict(
     test=dict(
         type='ImageNet',
         classes='../dataset/annotation/classes.txt',
-        data_prefix='../dataset/patches/classified/val/',
-        ann_file='../dataset/annotation/classes/val.txt'))
+        data_prefix='../dataset/patches/extracted/',
+        ann_file='../dataset/annotation/classes/test.txt'))
 
 evaluation = dict(interval=5, metric='accuracy')
