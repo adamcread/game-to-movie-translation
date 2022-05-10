@@ -304,7 +304,7 @@ data = dict(
             dict(type='Collect', keys=['img'])
         ],
         classes='../dataset/annotation/classes.txt'))
-evaluation = dict(interval=30, metric='accuracy')
+evaluation = dict(interval=5, metric='accuracy')
 paramwise_cfg = dict(
     norm_decay_mult=0.0,
     bias_decay_mult=0.0,
@@ -339,7 +339,7 @@ checkpoint_config = dict(interval=1)
 log_config = dict(interval=100, hooks=[dict(type='TextLoggerHook')])
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-load_from = None
+load_from = './checkpoints/swin_small_224_b16x64_300e_imagenet_20210615_110219-7f9d988b.pth'
 resume_from = None
 workflow = [('train', 1)]
 work_dir = './work_dirs/swin_tiny'
