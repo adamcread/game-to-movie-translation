@@ -2,7 +2,7 @@ _base_ = [
     '../swin_transformer/swin-tiny_16xb64_in1k.py'
 ]
 
-load_from = './checkpoints/swin_small_224_b16x64_300e_imagenet_20210615_110219-7f9d988b.pth'
+load_from = './swin_transformer/checkpoints/swin_pretrained.pth'
 
 
 model = dict(
@@ -19,17 +19,21 @@ data = dict(
     workers_per_gpu=8,
     train=dict(
         type='ImageNet',
-        classes='../dataset/annotation/classes.txt',
-        data_prefix='../dataset/patches/classified/train/'),
+        classes='./dataset/annotation/classification/classes.txt',
+        data_prefix='./dataset/patches/classified/train/'),
     val=dict(
         type='ImageNet',
-        classes='../dataset/annotation/classes.txt',
-        data_prefix='../dataset/patches/classified/val/',
-        ann_file='../dataset/annotation/val.txt'),
+        classes='./dataset/annotation/classification/classes.txt',
+        data_prefix='./dataset/patches/classified/val/',
+        ann_file='./dataset/annotation/classification/val.txt'),
     test=dict(
         type='ImageNet',
-        classes='../dataset/annotation/classes.txt',
-        data_prefix='../dataset/patches/extracted/',
-        ann_file='../dataset/annotation/test.txt'))
+        classes='./dataset/annotation/classification/classes.txt',
+        data_prefix='./dataset/patches/extracted/',
+        ann_file='./dataset/annotation/classification/test.txt'))
 
 evaluation = dict(interval=5, metric='accuracy')
+gpu_ids = [0]
+seed = 123
+device = 'cpu'
+work_dir='./'

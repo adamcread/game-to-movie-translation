@@ -1,7 +1,8 @@
 import os
 import random
+import torch
 _base_  = '../detectors/detectors_htc_r101_20e_coco.py'
-load_from = './checkpoints/detectors_htc_r101_20e_coco_20210419_203638-348d533b.pth'
+load_from = './detectoRS/checkpoints/detectors_pretrained.pth'
 
 # model settings
 model = dict(
@@ -88,9 +89,9 @@ model = dict(
     )
 )
 
-game_root = "../dataset/frames/train/trainA/"
+game_root = "./dataset/frames/train/trainA/"
 game_references = random.sample([game_root+x for x in os.listdir(game_root)], k=500)
-movie_root = "../dataset/frames/train/trainB/"
+movie_root = "./dataset/frames/train/trainB/"
 movie_references = random.sample([movie_root+x for x in os.listdir(movie_root)], k=500)
 train_transforms = [
     dict(
@@ -166,23 +167,23 @@ train_pipeline = [
 ]
 
 dataset_type = 'COCODataset'
-classes = ('person',)
+CLASSES = ('person',)
 data = dict(
     train=dict(
-        img_prefix='../coco/images/train/',
-        seg_prefix='../coco/segmentations/train/',
-        classes=classes,
-        ann_file='../coco/annotations/train_filtered.json',
+        img_prefix='./dataset/coco/images/train/',
+        seg_prefix='./dataset/coco/segmentations/train/',
+        classes=CLASSES,
+        ann_file='./dataset/annotation/segmentation/coco_train.json',
         pipeline=train_pipeline),
     val=dict(
-        img_prefix='../coco/images/val/',
-        seg_prefix='../coco/segmentations/val/',
-        classes=classes,
-        ann_file='../coco/annotations/val_filtered.json'),
+        img_prefix='./dataset/coco/images/val/',
+        seg_prefix='./dataset/coco/segmentations/val/',
+        classes=CLASSES,
+        ann_file='./dataset/annotation/segmentation/coco_val.json'),
     test=dict(
         img_prefix='../dataset/frames/',
-        classes=classes,
-        ann_file='../dataset/annotation/test.json'),
+        classes=CLASSES,
+        ann_file='./dataset/annotation/test.json'),
 )
 
 runner = dict(type='EpochBasedRunner', max_epochs=6)
@@ -196,3 +197,7 @@ lr_config = dict(
     step=[8, 11])
 
 optimizer_config = dict(_delete_=True, grad_clip=dict(max_norm=35, norm_type=2))
+gpu_ids = [0]
+device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+seed = 123
+work_dir = 'work_dir/'
